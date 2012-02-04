@@ -1,2 +1,2 @@
 test:
-	rspec test_*.rb */test_*.rb
+	env RUBYLIB=../lib rspec test_*.rb */test_*.rb
