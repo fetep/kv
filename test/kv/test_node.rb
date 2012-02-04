@@ -21,6 +21,17 @@ describe KV::Node do
     end
   end # describe initialize
 
+  describe "#load_attrs" do
+    it "should handle values with colons" do
+      node_path = File.join(@kvdb_path, "test")
+      File.open(node_path, "w+") do |f|
+        f.puts "key1: value: foo"
+      end
+      n = KV::Node.new("test", node_path)
+      n["key1"].should eq("value: foo")
+    end
+  end
+
   describe '#changed?' do
     it "should detect when the backing file mtime changes" do
       node_path = File.join(@kvdb_path, "test")

@@ -41,7 +41,7 @@ class KV; class Node
           next
         end
 
-        key, value = line.split(':')
+        key, value = line.split(':', 2)
         new_attrs[key.strip] = value.strip
       end # file.each
     end # File.open
