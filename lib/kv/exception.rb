@@ -1,2 +1,4 @@
-class KV; class Error < StandardError
-end; end # class KV::error
+class KV
+  class Error < StandardError
+  end # class Error
+end # class KV
