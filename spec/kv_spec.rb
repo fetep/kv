@@ -30,7 +30,7 @@ describe KV do
     end
 
     it "throws KV::Error when metadata is absent" do
-      expect { KV.new(:path => @tmp_path) }.should raise_error(KV::Error)
+      expect { KV.new(:path => @tmp_dir) }.should raise_error(KV::Error)
     end
 
     it "throws KV::Error when metadata is unparsable JSON" do
