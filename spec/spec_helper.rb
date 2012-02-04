@@ -1,9 +1,9 @@
 require "rubygems"
 require "fileutils"
 require "mkdtemp"
+require "rspec"
 
-require "kv"
-
+# See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |c|
   c.before(:each) do
     @tmp_dir = Dir.mkdtemp

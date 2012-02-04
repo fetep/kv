@@ -1,4 +1,5 @@
-require "test_framework"
+require "rspec/autorun"
+require "spec_helper"
 require "kv/util"
 
 describe KV::Util do

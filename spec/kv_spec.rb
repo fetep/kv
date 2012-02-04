@@ -1,7 +1,8 @@
 require "rubygems"
 require "json"
 
-require "test_framework"
+require "rspec/autorun"
+require "spec_helper"
 require "kv"
 
 describe KV do

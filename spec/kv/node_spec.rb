@@ -1,4 +1,5 @@
-require "test_framework"
+require "rspec/autorun"
+require "spec_helper"
 require "kv/node"
 
 describe KV::Node do
