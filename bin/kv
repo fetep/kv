@@ -1,0 +1,6 @@
+#!/usr/bin/ruby
+
+require "kv"
+
+kv = KV.new(:pathX => "/home/petef/kv/testdata")
+
