@@ -13,23 +13,21 @@ class KV; class Node
   end # def initialize
 
   public
-  def [](key)
-    return @attrs[key]
-  end
+  def [](key); @attrs[key]; end
 
   public
   def reload
     if changed?
       load_attrs
     end
-  end
+  end # def reload
 
   public
   def changed?
     stat = File.stat(@path) rescue nil
     cur_mtime = stat ? stat.mtime : 0
     return cur_mtime != @mtime
-  end
+  end # def changed?
 
   private
   def load_attrs

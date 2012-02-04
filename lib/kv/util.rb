@@ -7,5 +7,5 @@ class KV; class Util
     end
 
     return true
-  end # def initialize
+  end # def self.key_valid?
 end; end # class KV::Util

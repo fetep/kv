@@ -3,6 +3,7 @@ require "json"
 require "kv/exception"
 
 class KV
+  public
   def self.create_kvdb(kvdb_path)
     kvdb_metadata_path = File.join(kvdb_path, ".kvdb")
     kvdb_metadata = {
@@ -18,8 +19,9 @@ class KV
     File.open(kvdb_metadata_path, "w+") do |f|
       f.puts kvdb_metadata.to_json
     end
-  end
+  end # def self.create_kvdb
 
+  public
   def initialize(opts)
     @opts = {
       :path => nil,
@@ -39,13 +41,15 @@ class KV
     rescue
       raise KV::Error.new("error parsing #{@kvdb_metadata_path}: #{$!}")
     end
-  end
+  end # def initialize
 
+  public
   def lookup_node_path(node)
-  end
+  end # def lookup_node_path
 
+  public
   def lookup_node(node)
     File.open(lookup_node_path(node)) do |f|
     end
-  end
-end
+  end # def lookup_node
+end # class KV
