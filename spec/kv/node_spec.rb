@@ -20,6 +20,17 @@ describe KV::Node do
       n["key1"].should eq("value1")
       n["key2"].should eq("value2")
     end
+
+    it "should throw KV::Error if the file is unreadable" do
+      node_path = File.join(@kvdb_path, "test")
+      File.open(node_path, "w+") do |f|
+        f.puts "key1: value1"
+        f.puts "key2: value2"
+      end
+      File.chmod(0, node_path)
+      expect { KV::Node.new("test", node_path) }.should raise_error(KV::Error)
+    end
+
   end # describe initialize
 
   describe "#load_attrs" do
