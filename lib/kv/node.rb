@@ -36,6 +36,7 @@ class KV
       File.open(@path) do |file|
         @mtime = file.stat.mtime
         file.each do |line|
+          line.chomp!
           if line == '' or line[0..0] == '#'
             next
           end
