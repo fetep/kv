@@ -1,6 +1,8 @@
+require "rubygems"
 require "fileutils"
 require "json"
 require "kv/exception"
+require "uuidtools"
 
 class KV
   public
@@ -36,6 +38,12 @@ class KV
       raise KV::Error.new("can't see #{@kvdb_metadata_path}")
     end
 
+    load_metadata
+  end # def initialize
+
+
+  private
+  def load_metadata
     begin
       @kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
     rescue
@@ -54,15 +62,36 @@ class KV
     if @kvdb_metadata["version"] != "1"
       raise KV::Error.new("unknown metadata version #{@kvdb_metadata["version"].inspect}")
     end
-  end # def initialize
+  end # def load_metadata
+
+  private
+  def write_metadata
+    File.open(@kvdb_metadata_path, "w+") { |f| f.puts @kvdb_metadata.to_json }
+  end # def write_metadata
 
   public
-  def lookup_node_path(node)
-  end # def lookup_node_path
-
-  public
-  def lookup_node(node)
-    File.open(lookup_node_path(node)) do |f|
+  def node_path(node_name)
+    if @kvdb_metadata["mapping"][node_name]
+      return @kvdb_metadata["mapping"][node_name]
     end
-  end # def lookup_node
+
+    # get a UUID, build a path
+    uuid = UUIDTools::UUID.sha1_create(UUIDTools::UUID_OID_NAMESPACE,
+                                       node_name).to_s
+    path = File.join(uuid[0..0],
+                     uuid[1..1],
+                     uuid[2..2],
+                     uuid)
+    @kvdb_metadata["mapping"][node_name] = path
+
+    # re-write metadata
+    write_metadata
+
+    return path
+  end # def node_path
+
+  public
+  def node(node_name)
+    return KV::Node.new(node_name, node_path(node_name))
+  end
 end # class KV

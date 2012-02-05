@@ -32,14 +32,16 @@ describe KV do
     it "throws KV::Error when metadata is absent" do
       expect { KV.new(:path => @tmp_dir) }.should raise_error(KV::Error)
     end
+  end
+
+  describe '#load_metadata' do
+    it "can read the default metadata written" do
+      kv = KV.new(:path => @kvdb_path)
+    end
 
     it "throws KV::Error when metadata is unparsable JSON" do
       File.open(@kvdb_metadata_path, "w+") { |f| f.puts "{'" }
       expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
-    end
-
-    it "can read the default metadata written" do
-      kv = KV.new(:path => @kvdb_path)
     end
 
     it "throws KV::Error when metadata is missing a version" do
@@ -68,6 +70,25 @@ describe KV do
       File.open(@kvdb_metadata_path, "w+") { |f| f.puts kvdb_metadata.to_json  }
 
       expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
+    end
+  end
+
+  describe '#load_metadata' do
+    it "writes updated metadata" do
+      kv = KV.new(:path => @kvdb_path)
+      path = kv.node_path("test")
+
+      kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
+      kvdb_metadata["mapping"]["test"].should eq(path)
+    end
+  end
+
+  describe '#node' do
+    it "returns a KV::Node object for a new node" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.class.should eq(KV::Node)
+      n.name.should eq("test")
     end
   end
 end # KV
