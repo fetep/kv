@@ -79,6 +79,27 @@ describe KV::Node do
     end
   end
 
+  describe "#write_attrs" do
+    it "should be able to write out single-value keys" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n.set("key1", "value1")
+      n.save
+
+      File.read(node_path).split("\n").should eq(["key1: value1"])
+    end
+
+    it "should be able to write out multi-value keys" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n.set("key1", ["value1", "value2"])
+      n.save
+
+      File.read(node_path).split("\n").should \
+        eq(["key1: value1", "key1: value2"])
+    end
+  end
+
   describe '#changed?' do
     it "should detect when the backing file mtime changes" do
       node_path = File.join(@kvdb_path, "test")
