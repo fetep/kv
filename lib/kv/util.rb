@@ -24,5 +24,22 @@ class KV
         yield(key.strip, value.strip)
       end
     end # def self.parse_data
+
+    public
+    def self.expand_key_path(key_path)
+      if ! key_path.is_a?(String)
+        raise KV::Error, "invalid key path type #{key_path.class}"
+      end
+      node, key, index = key_path.split('#', 3)
+      if index
+        index = Integer(index) rescue nil
+      end
+
+      if node.nil? or node.empty?
+        raise KV::Error, "invalid key path, cannot be empty"
+      end
+
+      return node, key, index
+    end # def self.expand_key_path
   end # module Util
 end # class KV

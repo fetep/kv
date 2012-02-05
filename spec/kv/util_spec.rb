@@ -78,4 +78,57 @@ describe KV::Util do
       attrs.should eq(expected)
     end
   end
+
+  describe '.expand_key_path' do
+    it "should parse a full keypath with index" do
+      node, key, index = KV::Util.expand_key_path("test/1#key1.key2#0")
+      node.should eq("test/1")
+      key.should eq("key1.key2")
+      index.should eq(0)
+    end
+
+    it "should ignore an invalid keypath index" do
+      node, key, index = KV::Util.expand_key_path("test/1#key1.key2#m")
+      node.should eq("test/1")
+      key.should eq("key1.key2")
+      index.should eq(nil)
+
+      node, key, index = KV::Util.expand_key_path("test/1#key1.key2#")
+      node.should eq("test/1")
+      key.should eq("key1.key2")
+      index.should eq(nil)
+    end
+
+    it "should handle a keypath with a host and key, no index" do
+      node, key, index = KV::Util.expand_key_path("test/1#key1.key2")
+      node.should eq("test/1")
+      key.should eq("key1.key2")
+      index.should eq(nil)
+    end
+
+    it "should handle a keypath with a host no key or index" do
+      node, key, index = KV::Util.expand_key_path("test/1")
+      node.should eq("test/1")
+      key.should eq(nil)
+      index.should eq(nil)
+    end
+
+    it "should bail on an empty node name" do
+      expect { KV::Util.expand_key_path("#key") }.should \
+              raise_error(KV::Error, "invalid key path, cannot be empty")
+      expect { KV::Util.expand_key_path("#key#0") }.should \
+              raise_error(KV::Error, "invalid key path, cannot be empty")
+    end
+
+    it "should bail on invalid values" do
+      expect { KV::Util.expand_key_path("") }.should \
+              raise_error(KV::Error, "invalid key path, cannot be empty")
+      expect { KV::Util.expand_key_path(nil) }.should \
+              raise_error(KV::Error, "invalid key path type NilClass")
+      expect { KV::Util.expand_key_path(:x) }.should \
+              raise_error(KV::Error, "invalid key path type Symbol")
+      expect { KV::Util.expand_key_path(Array.new) }.should \
+              raise_error(KV::Error, "invalid key path type Array")
+    end
+  end
 end # describe KV::Node
