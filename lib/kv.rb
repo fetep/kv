@@ -80,7 +80,8 @@ class KV
     # get a UUID, build a path
     uuid = UUIDTools::UUID.sha1_create(UUIDTools::UUID_OID_NAMESPACE,
                                        node_name).to_s
-    path = File.join(uuid[0..0],
+    path = File.join(@opts[:path],
+                     uuid[0..0],
                      uuid[1..1],
                      uuid[2..2],
                      uuid)

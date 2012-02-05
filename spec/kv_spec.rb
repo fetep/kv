@@ -83,6 +83,25 @@ describe KV do
     end
   end
 
+  describe '#node_path' do
+    it "returns an existing mapping if one exists" do
+      node_path = File.join(@kvdb_path, "test")
+      kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
+      kvdb_metadata["mapping"]["test"] = node_path
+      File.open(@kvdb_metadata_path, "w+") do |f|
+        f.puts kvdb_metadata.to_json
+      end
+
+      kv = KV.new(:path => @kvdb_path)
+      kv.node_path("test").should eq(node_path)
+    end
+
+    it "returns a fully-qualified path for a new node file" do
+      kv = KV.new(:path => @kvdb_path)
+      kv.node_path("test").index(@kvdb_path).should eq(0)
+    end
+  end
+
   describe '#node' do
     it "returns a KV::Node object for a new node" do
       kv = KV.new(:path => @kvdb_path)
