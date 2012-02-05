@@ -67,6 +67,16 @@ describe KV::Node do
       n["key2"].should eq("value2")
       n.attrs.to_hash.keys.sort.should eq(["key1", "key2"])
     end
+
+    it "should read multiple lines as an array" do
+      node_path = File.join(@kvdb_path, "test")
+      File.open(node_path, "w+") do |f|
+        f.puts "key1: value1"
+        f.puts "key1: value2"
+      end
+      n = KV::Node.new("test", node_path)
+      n["key1"].should eq(["value1", "value2"])
+    end
   end
 
   describe '#changed?' do
