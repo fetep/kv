@@ -12,7 +12,7 @@ class KV
       @name, @path = name, path
       @mtime = 0
       @attrs = KV::Node::Attrs.new
-      load_attrs
+      load_data
     end # def initialize
 
     public
@@ -26,13 +26,13 @@ class KV
 
     public
     def save
-      write_attrs
+      write_data
     end
 
     public
     def reload
       if changed?
-        load_attrs
+        load_data
       end
     end # def reload
 
@@ -44,7 +44,7 @@ class KV
     end # def changed?
 
     private
-    def load_attrs
+    def load_data
       new_attrs = KV::Node::Attrs.new
       File.open(@path) do |file|
         @mtime = file.stat.mtime
@@ -64,15 +64,15 @@ class KV
       @mtime = 0
     rescue
       raise KV::Error.new("node #{@name} failed to load from #{path}: #{$!}")
-    end # def load_attrs
+    end # def load_data
 
     private
-    def write_attrs
+    def write_data
       File.open(@path, "w+") do |file|
         @attrs.each do |k, v|
           file.puts "#{k}: #{v}"
         end
       end
-    end # def write_attrs
+    end # def write_data
   end # class Node
 end # class KV

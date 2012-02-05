@@ -33,7 +33,7 @@ describe KV::Node do
 
   end # describe initialize
 
-  describe "#load_attrs" do
+  describe "#load_data" do
     it "should handle values with colons" do
       node_path = File.join(@kvdb_path, "test")
       File.open(node_path, "w+") do |f|
@@ -79,7 +79,7 @@ describe KV::Node do
     end
   end
 
-  describe "#write_attrs" do
+  describe "#write_data" do
     it "should be able to write out single-value keys" do
       node_path = File.join(@kvdb_path, "test")
       n = KV::Node.new("test", node_path)
