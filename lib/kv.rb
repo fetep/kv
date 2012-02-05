@@ -38,6 +38,8 @@ class KV
       raise KV::Error.new("can't see #{@kvdb_metadata_path}")
     end
 
+    @nodes = {}
+
     load_metadata
   end # def initialize
 
@@ -92,6 +94,13 @@ class KV
 
   public
   def node(node_name)
-    return KV::Node.new(node_name, node_path(node_name))
+    @nodes[node_name] ||= KV::Node.new(node_name, node_path(node_name))
+    return @nodes[node_name]
+  end
+
+  public
+  def node?(node_name)
+    path = @kvdb_metadata["mapping"][node_name]
+    return path ? File.exists?(path) : false
   end
 end # class KV

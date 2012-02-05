@@ -90,5 +90,51 @@ describe KV do
       n.class.should eq(KV::Node)
       n.name.should eq("test")
     end
+
+    it "returns a KV::Node object loaded with data" do
+      node_path = File.join(@kvdb_path, "test")
+      File.open(node_path, "w+") do |f|
+        f.puts "key1: value1"
+      end
+
+      kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
+      kvdb_metadata["mapping"]["test"] = node_path
+      File.open(@kvdb_metadata_path, "w+") do |f|
+        f.puts kvdb_metadata.to_json
+      end
+
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n["key1"].should eq("value1")
+    end
+
+    it "should return the same KV::Node object" do
+      kv = KV.new(:path => @kvdb_path)
+      n1 = kv.node("test")
+      n1.set("key1", "value1")
+      n2 = kv.node("test")
+      n2.object_id.should eq(n1.object_id)
+      n2["key1"].should eq(n1["key1"])
+    end
+  end
+
+  describe '#node?' do
+    it "should return false if a node does not exist in mapping" do
+      kv = KV.new(:path => @kvdb_path)
+      kv.node?("test").should eq(false)
+    end
+
+    it "should return false if a node is in mapping but no data file" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      kv.node?("test").should eq(false)
+    end
+
+    it "should return false if a node is in mapping and has a data file" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.save
+      kv.node?("test").should eq(true)
+    end
   end
 end # KV
