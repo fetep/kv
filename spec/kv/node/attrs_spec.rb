@@ -42,6 +42,12 @@ describe KV::Node::Attrs do
       n = KV::Node.new("test", node_path)
       expect { n.add(:key1, "value1") }.should raise_error(KV::Error)
     end
+
+    it "should bail on a non-String value" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      expect { n.add("key1", :value1) }.should raise_error(KV::Error)
+    end
   end # describe #add
 
   describe "#set" do
@@ -57,6 +63,18 @@ describe KV::Node::Attrs do
       n = KV::Node.new("test", node_path)
       n.set("key1", ["value1", "value2"])
       n["key1"].should eq(["value1", "value2"])
+    end
+
+    it "should bail on a non-String/Array value" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      expect { n.set("key1", :value1) }.should raise_error(KV::Error)
+    end
+
+    it "should bail on an array with a non-String element" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      expect { n.set("key1", ["value1", :value2]) }.should raise_error(KV::Error)
     end
 
     it "should throw a KV::Error given an invalid key" do
