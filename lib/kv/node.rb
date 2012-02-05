@@ -1,3 +1,4 @@
+require "fileutils"
 require "kv/node/attrs"
 
 class KV
@@ -68,6 +69,10 @@ class KV
 
     private
     def write_data
+      dest_dir = File.dirname(@path)
+      if ! File.exists?(dest_dir)
+        FileUtils.mkdir_p(dest_dir)
+      end
       File.open(@path, "w+") do |file|
         @attrs.each do |k, v|
           file.puts "#{k}: #{v}"

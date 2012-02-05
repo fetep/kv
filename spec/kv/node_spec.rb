@@ -98,6 +98,13 @@ describe KV::Node do
       File.read(node_path).split("\n").should \
         eq(["key1: value1", "key1: value2"])
     end
+
+    it "should create intermediate directories when saving a file" do
+      node_path = File.join(@kvdb_path, "test", "foo1")
+      n = KV::Node.new("test/foo1", node_path)
+      n.save
+      File.exists?(node_path).should eq(true)
+    end
   end
 
   describe '#changed?' do
