@@ -2,6 +2,8 @@ class KV
   module Util
     public
     def self.key_valid?(key)
+      return false unless key.is_a?(String)
+
       if key.index(':') || key.index('#') || key.index("'") ||
         key.index('"') || key.index(' ')
         return false
