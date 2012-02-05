@@ -7,7 +7,7 @@ class KV
   def self.create_kvdb(kvdb_path)
     kvdb_metadata_path = File.join(kvdb_path, ".kvdb")
     kvdb_metadata = {
-      "version" => "1.0",
+      "version" => "1",
       "mapping" => {},
     }
 
@@ -40,6 +40,19 @@ class KV
       @kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
     rescue
       raise KV::Error.new("error parsing #{@kvdb_metadata_path}: #{$!}")
+    end
+
+    if ! @kvdb_metadata["mapping"].is_a?(Hash)
+      raise KV::Error.new("corrupt metadata, mapping is not a hash")
+    end
+
+    if ! @kvdb_metadata.member?("version")
+      raise KV::Error.new("corrupt metadata, version is missing")
+    end
+
+    # TODO(petef): some day handle the ability to have multiple versions.
+    if @kvdb_metadata["version"] != "1"
+      raise KV::Error.new("unknown metadata version #{@kvdb_metadata["version"].inspect}")
     end
   end # def initialize
 

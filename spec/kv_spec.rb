@@ -13,7 +13,7 @@ describe KV do
       File.exists?(@kvdb_metadata_path).should eq(true)
 
       kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
-      kvdb_metadata["version"].should eq("1.0")
+      kvdb_metadata["version"].should eq("1")
       kvdb_metadata["mapping"].should eq({})
     end
 
@@ -40,6 +40,34 @@ describe KV do
 
     it "can read the default metadata written" do
       kv = KV.new(:path => @kvdb_path)
+    end
+
+    it "throws KV::Error when metadata is missing a version" do
+      kvdb_metadata = { "versionX" => "1", "mapping" => {} }
+      File.open(@kvdb_metadata_path, "w+") { |f| f.puts kvdb_metadata.to_json  }
+
+      expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
+    end
+
+    it "throws KV::Error when metadata is missing a mapping" do
+      kvdb_metadata = { "version" => "1", "mappingX" => {} }
+      File.open(@kvdb_metadata_path, "w+") { |f| f.puts kvdb_metadata.to_json  }
+
+      expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
+    end
+
+    it "throws KV::Error when metadata has a mapping that is not a hash" do
+      kvdb_metadata = { "version" => "1", "mapping" => [] }
+      File.open(@kvdb_metadata_path, "w+") { |f| f.puts kvdb_metadata.to_json  }
+
+      expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
+    end
+
+    it "throws KV::Error when metadata is not version 1" do
+      kvdb_metadata = { "version" => "2", "mapping" => {} }
+      File.open(@kvdb_metadata_path, "w+") { |f| f.puts kvdb_metadata.to_json  }
+
+      expect { KV.new(:path => @kvdb_path) }.should raise_error(KV::Error)
     end
   end
 end # KV
