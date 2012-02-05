@@ -151,4 +151,51 @@ describe KV::Node do
       n["key1"].should eq("value1")
     end
   end
+
+  describe '#[]=' do
+    it "should set a value" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n["foo"] = "bar"
+      n["foo"].should eq("bar")
+    end
+
+    it "should throw a KV::Error when passing a non-String key" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      expect { n[:foo] = "bar" }.should raise_error(KV::Error)
+    end
+
+    it "should throw a KV::Error when setting an invalid key name" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      expect { n["#foo"] = "bar" }.should raise_error(KV::Error)
+    end
+  end
+
+  describe '#save' do
+    it "should write an updated data file if one already exists" do
+      node_path = File.join(@kvdb_path, "test")
+      File.open(node_path, "w+") do |f|
+        f.puts "key1: value1"
+      end
+      n = KV::Node.new("test", node_path)
+      n["key2"] = "value2"
+      n.save
+
+      n = KV::Node.new("test", node_path)
+      n["key1"].should eq("value1")
+      n["key2"].should eq("value2")
+    end
+
+    it "should write an updated data file if it does not exist" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n["key1"] = "value1"
+      n.save
+
+      n = KV::Node.new("test", node_path)
+      n["key1"].should eq("value1")
+    end
+  end
 end # describe KV::Node

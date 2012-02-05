@@ -17,6 +17,22 @@ class KV
     def [](key); @attrs[key]; end
 
     public
+    def []=(key, value)
+      if ! key.is_a?(String)
+        raise KV::Error, "key value must be a String (not #{key.class})"
+      end
+      if ! KV::Util.key_valid?(key)
+        raise KV::Error, "key #{key.inspect} invalid"
+      end
+      @attrs[key] = value
+    end # def []=
+
+    public
+    def save
+      write_attrs
+    end
+
+    public
     def reload
       if changed?
         load_attrs
@@ -52,5 +68,14 @@ class KV
     rescue
       raise KV::Error.new("node #{@name} failed to load from #{path}: #{$!}")
     end # def load_attrs
+
+    private
+    def write_attrs
+      File.open(@path, "w+") do |file|
+        @attrs.each do |k, v|
+          file.puts "#{k}: #{v}"
+        end
+      end
+    end # def write_attrs
   end # class Node
 end # class KV
