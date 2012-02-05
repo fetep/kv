@@ -1,6 +1,36 @@
 #!/usr/bin/ruby
 
-require "kv"
+$: << File.join(File.dirname($0), "..", "lib")
 
-kv = KV.new(:pathX => "/home/petef/kv/testdata")
+require "kv/command"
+require "optparse"
 
+$kvdb_path = ENV["KVDB"] || "."
+$progname = File.basename($0)
+
+# kv global options
+opts = OptionParser.new do |opts|
+  opts.on("-d", "--directory DIR", "kvdb directory") do |dir|
+    $kvdb_path = dir
+  end
+end
+
+begin
+  opts.order!
+rescue OptionParser::InvalidOption
+  $stderr.puts "#{progname}: #{$!}"
+  exit 1
+end
+
+if ARGV.length == 0
+  $stderr.puts "#{$progname}: missing subcommand"
+  exit 1
+end
+
+command = ARGV[0]
+begin
+  KV::Command.start(ARGV)
+rescue KV::Error
+  $stderr.puts "#{$progname}: #{command}: #{$!}"
+  exit 2
+end
