@@ -1,5 +1,6 @@
 require "fileutils"
 require "kv/node/attrs"
+require "kv/util"
 
 class KV
   class Node
@@ -49,15 +50,10 @@ class KV
       new_attrs = KV::Node::Attrs.new
       File.open(@path) do |file|
         @mtime = file.stat.mtime
-        file.each do |line|
-          line.chomp!
-          if line == '' or line[0..0] == '#'
-            next
-          end
 
-          key, value = line.split(':', 2)
-          new_attrs.add(key.strip, value.strip)
-        end # file.each
+        KV::Util.parse_data(file.read) do |key, value|
+          new_attrs.add(key, value)
+        end
       end # File.open
       @attrs = new_attrs
     rescue Errno::ENOENT

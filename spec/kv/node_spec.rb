@@ -34,48 +34,14 @@ describe KV::Node do
   end # describe initialize
 
   describe "#load_data" do
-    it "should handle values with colons" do
+    it "should properly load data from a file" do
       node_path = File.join(@kvdb_path, "test")
       File.open(node_path, "w+") do |f|
         f.puts "key1: value: foo"
       end
+
       n = KV::Node.new("test", node_path)
       n["key1"].should eq("value: foo")
-    end
-
-    it "should skip comments" do
-      node_path = File.join(@kvdb_path, "test")
-      File.open(node_path, "w+") do |f|
-        f.puts "key1: value1"
-        f.puts "#key2: value2"
-      end
-      n = KV::Node.new("test", node_path)
-      n["key1"].should eq("value1")
-      n["key2"].should eq(nil)
-      n["#key2"].should eq(nil)
-    end
-
-    it "should skip blank lines" do
-      node_path = File.join(@kvdb_path, "test")
-      File.open(node_path, "w+") do |f|
-        f.puts "key1: value1"
-        f.puts ""
-        f.puts "key2: value2"
-      end
-      n = KV::Node.new("test", node_path)
-      n["key1"].should eq("value1")
-      n["key2"].should eq("value2")
-      n.attrs.to_hash.keys.sort.should eq(["key1", "key2"])
-    end
-
-    it "should read multiple lines as an array" do
-      node_path = File.join(@kvdb_path, "test")
-      File.open(node_path, "w+") do |f|
-        f.puts "key1: value1"
-        f.puts "key1: value2"
-      end
-      n = KV::Node.new("test", node_path)
-      n["key1"].should eq(["value1", "value2"])
     end
   end
 
