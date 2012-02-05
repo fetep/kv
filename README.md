@@ -9,8 +9,10 @@ Nodes use "/" for namespace. Example node names: "host/bar", "switch/foo".
 
 Keys use "." for namespace. Example key names: "hardware.cpu_model", "foo".
 
-The full canonical "path" for a value includes the node and the key name.
-Example path: "host/bar.hardware.cpu_model".
+The full canonical "path" for a value includes the node and the key name,
+joined with a '#'.
+
+Example path: "host/bar#hardware.cpu_model".
 
 ## Data File Format
 ...
