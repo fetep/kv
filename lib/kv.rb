@@ -2,6 +2,7 @@ require "rubygems"
 require "fileutils"
 require "json"
 require "kv/exception"
+require "kv/node"
 require "uuidtools"
 
 class KV
