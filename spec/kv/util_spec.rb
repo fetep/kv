@@ -34,6 +34,25 @@ describe KV::Util do
     end
   end
 
+  describe '.value_valid?' do
+    it "should return true on valid values" do
+      valid_values = ["foo", "bar baz", "#foo#bar#baz"]
+      valid_values.each do |k|
+        KV::Util.value_valid?(k).should eq(true)
+      end
+    end
+
+    it "should return false on empty values" do
+      KV::Util.value_valid?("").should eq(false)
+    end
+
+    it "should return false on non-Strings" do
+      KV::Util.value_valid?(nil).should eq(false)
+      KV::Util.value_valid?(Array.new).should eq(false)
+      KV::Util.value_valid?(5).should eq(false)
+    end
+  end
+
   describe '.parse_data' do
     it "should handle values with colons" do
       attrs = Hash.new { |h, k| h[k] = Array.new }

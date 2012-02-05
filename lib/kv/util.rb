@@ -13,6 +13,12 @@ class KV
     end # def self.key_valid?
 
     public
+    def self.value_valid?(value)
+      return false unless value.is_a?(String)
+      return !value.empty?
+    end
+
+    public
     def self.parse_data(data, &block)
       data.split("\n").each do |line|
         line.chomp!

@@ -8,8 +8,8 @@ class KV
 
       public
       def add(key, value)
-        if ! value.is_a?(String)
-          raise KV::Error, "value elements must be a String"
+        if ! KV::Util.value_valid?(value)
+          raise KV::Error, "invalid value"
         end
 
         if ! KV::Util.key_valid?(key)
@@ -24,8 +24,8 @@ class KV
       def set(key, value)
         value = [value] unless value.is_a?(Array)
         value.each do |v|
-          if ! v.is_a?(String)
-            raise KV::Error, "value elements must be a String"
+          if ! KV::Util.value_valid?(v)
+            raise KV::Error, "invalid value"
           end
         end
 
