@@ -1,3 +1,5 @@
+require "kv/node/attrs"
+
 class KV
   class Node
     attr_reader :attrs
@@ -9,7 +11,7 @@ class KV
     def initialize(name, path)
       @name, @path = name, path
       @mtime = 0
-      @attrs = {}
+      @attrs = KV::Node::Attrs.new
       load_attrs
     end # def initialize
 
@@ -17,15 +19,10 @@ class KV
     def [](key); @attrs[key]; end
 
     public
-    def []=(key, value)
-      if ! key.is_a?(String)
-        raise KV::Error, "key value must be a String (not #{key.class})"
-      end
-      if ! KV::Util.key_valid?(key)
-        raise KV::Error, "key #{key.inspect} invalid"
-      end
-      @attrs[key] = value
-    end # def []=
+    def add(key, value); @attrs.add(key, value); end
+
+    public
+    def set(key, value); @attrs.set(key, value); end
 
     public
     def save
@@ -48,7 +45,7 @@ class KV
 
     private
     def load_attrs
-      new_attrs = {}
+      new_attrs = KV::Node::Attrs.new
       File.open(@path) do |file|
         @mtime = file.stat.mtime
         file.each do |line|
@@ -58,12 +55,12 @@ class KV
           end
 
           key, value = line.split(':', 2)
-          new_attrs[key.strip] = value.strip
+          new_attrs.add(key.strip, value.strip)
         end # file.each
       end # File.open
       @attrs = new_attrs
     rescue Errno::ENOENT
-      @attrs = {}
+      @attrs.clear
       @mtime = 0
     rescue
       raise KV::Error.new("node #{@name} failed to load from #{path}: #{$!}")
