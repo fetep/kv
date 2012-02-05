@@ -156,4 +156,14 @@ describe KV do
       kv.node?("test").should eq(true)
     end
   end
+
+  describe '#nodes' do
+    it "should return an array of all available nodes" do
+      kv = KV.new(:path => @kvdb_path)
+      kv.node("test/1")
+      kv.node("test/2")
+      kv.node("test/3")
+      kv.nodes.should eq(["test/1", "test/2", "test/3"])
+    end
+  end
 end # KV

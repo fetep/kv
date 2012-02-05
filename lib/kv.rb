@@ -104,4 +104,9 @@ class KV
     path = @kvdb_metadata["mapping"][node_name]
     return path ? File.exists?(path) : false
   end
+
+  public
+  def nodes
+    return @kvdb_metadata["mapping"].keys
+  end # def nodes
 end # class KV
