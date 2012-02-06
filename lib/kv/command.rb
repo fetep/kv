@@ -60,7 +60,6 @@ class KV
     def print(key_path)
       kv_init
 
-      $stderr.puts "here, options=#{options.inspect}"
       puts @kv.expand(key_path, options[:verbose]).join("\n")
     end
 
