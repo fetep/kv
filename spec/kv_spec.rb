@@ -166,4 +166,77 @@ describe KV do
       kv.nodes.should eq(["test/1", "test/2", "test/3"])
     end
   end
+
+  describe '#expand' do
+    it "should list all node attributes given a valid node name" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.set("key1", ["value1", "value2"])
+      n.set("key2", "value")
+      n.save
+
+      kv.expand("test").should eq([
+        "test#key1#0: value1",
+        "test#key1#1: value2",
+        "test#key2: value",
+        ])
+    end
+
+    it "should raise an exception if the node_name does not exist" do
+      kv = KV.new(:path => @kvdb_path)
+      expect { kv.expand("test") }.should \
+             raise_error(KV::Error, "node test does not exist")
+    end
+
+    it "should return [] if the node does not exist and raise_on_bad_node_name is false" do
+      kv = KV.new(:path => @kvdb_path)
+      kv.expand("test", false, false).should eq([])
+    end
+
+    it "should show just the value when given a full keypath" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.set("key1x", ["value1", "value2"])
+      n.set("key2", "value")
+      n.save
+
+      kv.expand("test#key1x").should eq([
+        "value1",
+        "value2",
+        ])
+      kv.expand("test#key2").should eq([
+        "value",
+        ])
+    end
+
+    it "should show the keypath and value when given a full keypath and verbose is true" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.set("key1", ["value1", "value2"])
+      n.set("key2", "value")
+      n.save
+
+      kv.expand("test#key1", true).should eq([
+        "test#key1#0: value1",
+        "test#key1#1: value2",
+        ])
+      kv.expand("test#key2", true).should eq([
+        "test#key2: value",
+        ])
+    end
+
+    it "should list all node attributes given a valid node name" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.set("key1", ["value1", "value2"])
+      n.set("key2", "value")
+      n.save
+
+      kv.expand("test").should eq([
+        "test#key1#0: value1",
+        "test#key1#1: value2",
+        "test#key2: value",
+        ])
+    end
+  end
 end # KV

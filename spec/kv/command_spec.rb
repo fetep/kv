@@ -117,4 +117,43 @@ describe KV::Command do
       n["key2"].should eq("value")
     end
   end
-end # describe KV::Node
+
+  describe '#print' do
+    it "should error if the node does not exist" do
+      $kvdb_path = @kvdb_path
+
+      stdout, stderr = wrap_output do
+        expect do
+          KV::Command.start(["print", "test#foo"])
+        end.should raise_error(KV::Error, "node test does not exist")
+      end
+      stdout.should eq('')
+    end
+
+    it "should print a variable" do
+      $kvdb_path = @kvdb_path
+      kv = KV.new(:path => $kvdb_path)
+      n = kv.node("test")
+      n.set("foo", "bar")
+      n.save
+
+      stdout, stderr = wrap_output do
+        KV::Command.start(["print", "test#foo"])
+      end
+      stdout.should eq("bar\n")
+    end
+
+    it "should print a variable with full keypath if -v verbose" do
+      $kvdb_path = @kvdb_path
+      kv = KV.new(:path => $kvdb_path)
+      n = kv.node("test")
+      n.set("foo", "bar")
+      n.save
+
+      stdout, stderr = wrap_output do
+        KV::Command.start(["print", "-v", "test#foo"])
+      end
+      stdout.should eq("test#foo: bar\n")
+    end
+  end # describe KV::Node
+end

@@ -52,6 +52,18 @@ class KV
       n.save
     end
 
+    desc "print NODE|KEYPATH", "print out all node keys or a specific keypath"
+    method_option :verbose, :aliases => "-v",
+                  :desc => "Verbose (always show keypath)",
+                  :type => :boolean,
+                  :default => false
+    def print(key_path)
+      kv_init
+
+      $stderr.puts "here, options=#{options.inspect}"
+      puts @kv.expand(key_path, options[:verbose]).join("\n")
+    end
+
     private
     def kv_init
       @kv = KV.new(:path => $kvdb_path)

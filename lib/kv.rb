@@ -3,6 +3,7 @@ require "fileutils"
 require "json"
 require "kv/exception"
 require "kv/node"
+require "kv/util"
 require "uuidtools"
 
 class KV
@@ -110,4 +111,50 @@ class KV
   def nodes
     return @kvdb_metadata["mapping"].keys
   end # def nodes
+
+  public
+  def expand(key_path, verbose = false, raise_on_bad_node_name = true)
+    res = []
+    # key_path must be a full key_path or just a node name
+    node_name, key, index = KV::Util.expand_key_path(key_path)
+
+    if ! node?(node_name)
+      if raise_on_bad_node_name
+        raise KV::Error, "node #{node_name} does not exist"
+      else
+        return res
+      end
+    end
+
+    node = self.node(node_name)
+    if key.nil?
+      node.attrs.to_hash.each do |key, values|
+        res.push(*expand_values(node, key, values, true))
+      end
+    elsif node[key]
+      res.push(*expand_values(node, key, node[key], verbose))
+    end
+
+    return res
+  end # def expand
+
+  private
+  def expand_values(node, key, values, verbose)
+    res = []
+    values = [values] unless values.is_a?(Array)
+
+    index = values.length > 1 ? 0 : nil
+
+    values.each do |value|
+      if verbose
+        index_suffix = index ? "##{index}" : ""
+        res << "#{node.name}##{key}#{index_suffix}: #{value}"
+        index += 1 if index
+      else
+        res << value
+      end
+    end
+
+    return res
+  end # def expand_values
 end # class KV
