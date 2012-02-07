@@ -75,6 +75,9 @@ class KV
 
   public
   def node_path(node_name)
+    if ! node_name.is_a?(String)
+      raise "node_path takes a String, not: #{node_name.inspect}"
+    end
     if @kvdb_metadata["mapping"][node_name]
       return @kvdb_metadata["mapping"][node_name]
     end
