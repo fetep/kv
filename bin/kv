@@ -2,34 +2,46 @@
 
 $: << File.join(File.dirname($0), "..", "lib")
 
+require "rubygems"
 require "kv/command"
-require "optparse"
+require "trollop"
 
-$kvdb_path = ENV["KVDB"] || "."
 $progname = File.basename($0)
 
 # kv global options
-opts = OptionParser.new do |opts|
-  opts.on("-d", "--directory DIR", "kvdb directory") do |dir|
-    $kvdb_path = dir
+opts = Trollop::options do
+  version "kv 0.0.1"
+  banner <<-EOS
+Usage: kv [-d kvdb] SUBCOMMAND [SUBOPTIONS ...]
+
+EOS
+
+  opt :kvdb, "path to kvdb", :default => ENV["KVDB"] || ".",
+      :short => "-d"
+
+  banner <<-EOS
+
+ Available subcommands:
+EOS
+  KV::Command::VALID_COMMANDS.each do |c|
+    banner "    * #{c}\n"
   end
+  banner <<-EOS
+
+ For help on a sub command, run:
+
+     kv SUBCOMMAND -h
+
+ OTHER OPTIONS:
+EOS
+  stop_on_unknown
 end
 
+Trollop::die "missing subcommand" if ARGV.length == 0
+
+command = ARGV.shift
 begin
-  opts.order!
-rescue OptionParser::InvalidOption
-  $stderr.puts "#{progname}: #{$!}"
-  exit 1
-end
-
-if ARGV.length == 0
-  $stderr.puts "#{$progname}: missing subcommand"
-  exit 1
-end
-
-command = ARGV[0]
-begin
-  KV::Command.start(ARGV)
+  KV::Command.new(opts[:kvdb]).run(command, ARGV)
 rescue KV::Error
   $stderr.puts "#{$progname}: #{command}: #{$!}"
   exit 2
