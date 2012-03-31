@@ -106,13 +106,12 @@ class KV
 
   public
   def node?(node_name)
-    path = @kvdb_metadata["mapping"][node_name]
-    return path ? File.exists?(path) : false
+    return @kvdb_metadata["mapping"].keys.member?(node_name)
   end
 
   public
   def nodes
-    return @kvdb_metadata["mapping"].keys
+    return @kvdb_metadata["mapping"].keys.sort
   end # def nodes
 
   public
@@ -138,7 +137,7 @@ class KV
       res.push(*expand_values(node, key, node[key], verbose))
     end
 
-    return res
+    return res.sort
   end # def expand
 
   private

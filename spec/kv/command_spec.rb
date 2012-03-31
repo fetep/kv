@@ -37,7 +37,7 @@ describe KV::Command do
       kv.node("foo/1")
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("list", "test/")
+        KV::Command.new(@kvdb_path).run("list", ["test/"])
       end
       stdout.should eq("test/1\n")
     end
@@ -49,7 +49,7 @@ describe KV::Command do
 
       stdout, stderr = wrap_output do
         expect do
-          KV::Command.new(@kvdb_path).run("nodepath", "foo/bar")
+          KV::Command.new(@kvdb_path).run("nodepath", ["foo/bar"])
         end.should raise_error(KV::Error, "foo/bar does not exist")
       end
       stdout.should eq('')
@@ -62,7 +62,7 @@ describe KV::Command do
       n.save
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("nodepath", "test")
+        KV::Command.new(@kvdb_path).run("nodepath", ["test"])
       end
 
       stdout.chomp.should eq(n.path)
@@ -78,7 +78,7 @@ describe KV::Command do
 
       stdout, stderr = wrap_output do
         expect do
-          KV::Command.new(@kvdb_path).run("import", "test", "/dev/null")
+          KV::Command.new(@kvdb_path).run("import", ["test", "/dev/null"])
         end.should raise_error(KV::Error, "test already exists")
       end
       stdout.should eq('')
@@ -90,7 +90,7 @@ describe KV::Command do
       bad_path = File.join(@tmp_dir, "not", "here")
       stdout, stderr = wrap_output do
         expect do
-          KV::Command.new(@kvdb_path).run("import", "test", bad_path)
+          KV::Command.new(@kvdb_path).run("import", ["test", bad_path])
         end.should raise_error(KV::Error, "#{bad_path}: data file does not exist")
       end
       stdout.should eq('')
@@ -107,7 +107,7 @@ describe KV::Command do
       end
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("import", "test", data_file)
+        KV::Command.new(@kvdb_path).run("import", ["test", data_file])
       end
       stdout.should eq('')
 
@@ -125,7 +125,7 @@ describe KV::Command do
 
       stdout, stderr = wrap_output do
         expect do
-          KV::Command.new(@kvdb_path).run("print", "test#foo")
+          KV::Command.new(@kvdb_path).run("print", ["test#foo"])
         end.should raise_error(KV::Error, "node test does not exist")
       end
       stdout.should eq('')
@@ -139,7 +139,7 @@ describe KV::Command do
       n.save
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("print", "test#foo")
+        KV::Command.new(@kvdb_path).run("print", ["test#foo"])
       end
       stdout.should eq("bar\n")
     end
@@ -152,7 +152,7 @@ describe KV::Command do
       n.save
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("print", "-v", "test#foo")
+        KV::Command.new(@kvdb_path).run("print", ["-v", "test#foo"])
       end
       stdout.should eq("test#foo: bar\n")
     end

@@ -13,7 +13,7 @@ class KV
     end # def initialize
 
     public
-    def run(cmd, args)
+    def run(cmd, args=[])
       if ! VALID_COMMANDS.member?(cmd)
         raise KV::Error, "invalid subcommand #{cmd}"
       end
@@ -62,23 +62,23 @@ class KV
     end # def list
 
     public
-    def nodepath(*args)
+    def nodepath(args)
       kv_init
 
       opts = Trollop::options(args) do
         banner "Usage: kv [-d dir] nodepath <node>"
       end
 
-      if args.length > 1
+      if args.length != 1
         raise KV::Error, "kv nodepath only takes one node argument"
       end
 
-      node = args.shift
+      node_name = args.shift
 
-      if ! @kv.node?(node)
-        raise KV::Error, "#{node} does not exist"
+      if ! @kv.node?(node_name)
+        raise KV::Error, "#{node_name} does not exist"
       end
-      puts @kv.node(node).path
+      puts @kv.node(node_name).path
     end # def nodepath
 
     public
@@ -102,14 +102,30 @@ class KV
 
     public
     def import(args)
+      kv_init
 
       opts = Trollop::options(args) do
         banner "Usage: kv [-d dir] import <node> [<datafile>]" +
                "\n\n  reads from stdin if no datafile is provided"
                "\n\ndata should be of format 'key: value'"
       end
-      args.unshift("-c")
-      set(args)
+
+      node_name = args.shift
+      datafile = args.shift
+
+      if node_name.nil?
+        raise KV::Error, "must specify a node name"
+      end
+
+      if args.length > 0
+        raise KV::Error, "too many arguments"
+      end
+
+      if @kv.node?(node_name)
+        raise KV::Error, "#{node_name} already exists"
+      end
+
+      set(["-c", node_name, datafile])
     end
 
     public
@@ -125,14 +141,23 @@ class KV
             :default => false
       end
 
-      if args.length < 1 or args.length > 2
-        raise KV::Error, "invalid number of arguments"
-      end
-
       node_name = args.shift
       datafile = args.shift
+
+      if node_name.nil?
+        raise KV::Error, "must specify a node name"
+      end
+
+      if args.length > 0
+        raise KV::Error, "too many arguments"
+      end
+
       if ! @kv.node?(node_name) and ! opts[:create]
         raise KV::Error, "node #{node_name} does not exist, and -c not given"
+      end
+
+      if datafile and ! File.exists?(datafile)
+        raise KV::Error, "#{datafile}: data file does not exist"
       end
 
       node = @kv.node(node_name)

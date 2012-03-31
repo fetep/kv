@@ -143,12 +143,6 @@ describe KV do
       kv.node?("test").should eq(false)
     end
 
-    it "should return false if a node is in mapping but no data file" do
-      kv = KV.new(:path => @kvdb_path)
-      n = kv.node("test")
-      kv.node?("test").should eq(false)
-    end
-
     it "should return false if a node is in mapping and has a data file" do
       kv = KV.new(:path => @kvdb_path)
       n = kv.node("test")
