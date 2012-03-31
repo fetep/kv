@@ -13,16 +13,16 @@ class KV
     end # def initialize
 
     public
-    def run(cmd, *args)
+    def run(cmd, args)
       if ! VALID_COMMANDS.member?(cmd)
         raise KV::Error, "invalid subcommand #{cmd}"
       end
 
-      send(cmd, *args)
+      send(cmd, args)
     end # def run
 
     public
-    def init(*args)
+    def init(args)
       opts = Trollop::options(args) do
         banner "Usage: kv [-d dir] init"
       end
@@ -35,7 +35,7 @@ class KV
     end # def init
 
     public
-    def list(*args)
+    def list(args)
       kv_init
 
       opts = Trollop::options(args) do
@@ -47,7 +47,7 @@ class KV
         raise KV::Error, "kv list only takes one filter argument"
       end
 
-      regexp = Regexp.new(args.first) if args.first
+      regexp = Regexp.new(args.first) if args.length > 0
       @kv.nodes.each do |node|
         if regexp
           next unless node.match(regexp)
@@ -116,7 +116,7 @@ class KV
     end
 
     public
-    def print(*args)
+    def print(args)
       kv_init
 
       opts = Trollop::options(args) do
@@ -136,7 +136,7 @@ class KV
 
     private
     def kv_init
-      @kv = KV.new(:path => @kvdb_path)
+      @kv ||= KV.new(:path => @kvdb_path)
     end # def kv_init
   end # class Command
 end # class KV
