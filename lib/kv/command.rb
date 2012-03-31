@@ -5,7 +5,7 @@ require "trollop"
 
 class KV
   class Command
-    VALID_COMMANDS = ["import", "init", "list", "nodepath", "print"]
+    VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set"]
 
     public
     def initialize(kvdb_path)
@@ -81,40 +81,6 @@ class KV
       puts @kv.node(node).path
     end # def nodepath
 
-    def import(*args)
-      kv_init
-
-      opts = Trollop::options(args) do
-        banner "Usage: kv [-d dir] import <node> [<datafile>]" +
-               "\n\n  reads from stdin if no datafile is provided"
-      end
-
-      if args.length == 0
-        raise KV::Error, "kv import takes at least one argument"
-      end
-
-      if args.length > 2
-        raise KV::Error, "kv import takes at most two arguments"
-      end
-
-      node = args.shift
-      datafile = args.shift
-
-      if @kv.node?(node)
-        raise KV::Error, "#{node} already exists"
-      end
-
-      if datafile && !File.exists?(datafile)
-        raise KV::Error, "#{datafile}: data file does not exist"
-      end
-
-      n = @kv.node(node)
-      KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read) do |k, v|
-        n.add(k, v)
-      end
-      n.save
-    end
-
     public
     def print(args)
       kv_init
@@ -132,6 +98,48 @@ class KV
       key_path = args.first
 
       puts @kv.expand(key_path, opts[:verbose]).join("\n")
+    end
+
+    public
+    def import(args)
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] import <node> [<datafile>]" +
+               "\n\n  reads from stdin if no datafile is provided"
+               "\n\ndata should be of format 'key: value'"
+      end
+      args.unshift("-c")
+      set(args)
+    end
+
+    public
+    def set(args)
+      kv_init
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] set [-c] <node> [<datafile>]" +
+               "\n\n  reads from stdin if no datafile is provided"
+               "\n\ndata should be of format 'key: value'"
+
+        opt :create, :description => "allow creation of new nodes",
+            :default => false
+      end
+
+      if args.length < 1 or args.length > 2
+        raise KV::Error, "invalid number of arguments"
+      end
+
+      node_name = args.shift
+      datafile = args.shift
+      if ! @kv.node?(node_name) and ! opts[:create]
+        raise KV::Error, "node #{node_name} does not exist, and -c not given"
+      end
+
+      node = @kv.node(node_name)
+      KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read) do |k, v|
+        node.add(k, v)
+      end
+      node.save
     end
 
     private
