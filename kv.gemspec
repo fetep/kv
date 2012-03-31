@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "uuidtools"
 
   # testing-related
-  spec.add_dependency "mkdtemp"
-  spec.add_dependency "rspec"
+  spec.add_development_dependency "mkdtemp"
+  spec.add_development_dependency "rspec"
 
   spec.files = files
   spec.require_paths << "lib"
