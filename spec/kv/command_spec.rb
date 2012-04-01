@@ -3,6 +3,13 @@ require "spec_helper"
 require "kv/command"
 
 describe KV::Command do
+  describe '#run' do
+    it "should error on an unknown command" do
+      expect { KV::Command.new($kvdb_path).run("foo") }.should \
+        raise_error(KV::Error, "invalid subcommand foo")
+    end
+  end
+
   describe '#init' do
     it "should initialize a new kvdb" do
       new_kvdb_path = File.join(@tmp_dir, "kvdb2")
@@ -10,6 +17,11 @@ describe KV::Command do
 
       expect { KV.new(:path => new_kvdb_path) }.should_not \
         raise_error(KV::Error)
+    end
+
+    it "should error when passed any arguments" do
+      expect { KV::Command.new($kvdb_path).init(["foo"]) }.should \
+        raise_error(KV::Error, "init takes no arguments")
     end
   end
 
@@ -32,7 +44,6 @@ describe KV::Command do
     it "should filter based on a regexp" do
       $kvdb_path = @kvdb_path
       kv = KV.new(:path => $kvdb_path)
-      expected = []
       kv.node("test/1")
       kv.node("foo/1")
 
@@ -40,6 +51,27 @@ describe KV::Command do
         KV::Command.new(@kvdb_path).run("list", ["test/"])
       end
       stdout.should eq("test/1\n")
+    end
+
+    it "should print the full keypath with -v" do
+      $kvdb_path = @kvdb_path
+      kv = KV.new(:path => $kvdb_path)
+      expected = []
+      n = kv.node("test/1")
+      expected << "#{n.name} #{n.path}"
+      n = kv.node("test/2")
+      expected << "#{n.name} #{n.path}"
+
+      stdout, stderr = wrap_output do
+        KV::Command.new(@kvdb_path).run("list", ["-p", "test/"])
+      end
+      stdout.should eq(expected.join("\n") + "\n")
+    end
+
+    it "should error when given too many arguments" do
+      kv = KV.new(:path => @kvdb_path)
+      expect { KV::Command.new(@kvdb_path).list(["foo", "bar"]) }.should \
+        raise_error(KV::Error, "list only takes one filter argument")
     end
   end
 
@@ -66,6 +98,14 @@ describe KV::Command do
       end
 
       stdout.chomp.should eq(n.path)
+    end
+
+    it "should require exactly one argument" do
+      expect { KV::Command.new(@kvdb_path).run("nodepath", []) }.should \
+        raise_error(KV::Error, "nodepath takes one argument")
+
+      expect { KV::Command.new(@kvdb_path).run("nodepath", ["a", "b"]) }.should \
+        raise_error(KV::Error, "nodepath takes one argument")
     end
   end
 
@@ -96,6 +136,16 @@ describe KV::Command do
       stdout.should eq('')
     end
 
+    it "should fail with the wrong number of arguments" do
+      expect { KV::Command.new(@kvdb_path).run("import", []) }.should \
+        raise_error(KV::Error, "must specify a node name")
+
+      expect { KV::Command.new(@kvdb_path).run("import", ["a", "b", "c"]) }.should \
+        raise_error(KV::Error, "too many arguments")
+    end
+  end
+
+  describe '#set' do
     it "should load data from a file" do
       $kvdb_path = @kvdb_path
 
@@ -116,6 +166,26 @@ describe KV::Command do
       n = kv.node("test")
       n["key1"].should eq(["value1", "value2"])
       n["key2"].should eq("value")
+    end
+
+    it "should refuse to create a new node without -c" do
+      kv = KV.new(:path => @kvdb_path)
+
+      expect { KV::Command.new(@kvdb_path).run("set", ["test/1"]) }.should \
+        raise_error(KV::Error, "node test/1 does not exist, and -c not given")
+    end
+
+    it "should create a new node with -c" do
+      expect { KV::Command.new(@kvdb_path).run("set", ["-c", "test/1", "/dev/null"]) }.should_not \
+        raise_error(KV::Error, "node test/1 does not exist, and -c not given")
+    end
+
+    it "should fail with the wrong number of arguments" do
+      expect { KV::Command.new(@kvdb_path).run("set", []) }.should \
+        raise_error(KV::Error, "must specify a node name")
+
+      expect { KV::Command.new(@kvdb_path).run("set", ["a", "b", "c"]) }.should \
+        raise_error(KV::Error, "too many arguments")
     end
   end
 
@@ -155,6 +225,14 @@ describe KV::Command do
         KV::Command.new(@kvdb_path).run("print", ["-v", "test#foo"])
       end
       stdout.should eq("test#foo: bar\n")
+    end
+
+    it "should require exactly one argument" do
+      expect { KV::Command.new(@kvdb_path).run("print", []) }.should \
+        raise_error(KV::Error, "print takes one argument")
+
+      expect { KV::Command.new(@kvdb_path).run("print", ["a", "b"]) }.should \
+        raise_error(KV::Error, "print takes one argument")
     end
   end # describe KV::Node
 end

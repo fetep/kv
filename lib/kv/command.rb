@@ -28,7 +28,7 @@ class KV
       end
 
       if args.length > 0
-        raise KV::Error, :args, "init takes no arguments"
+        raise KV::Error, "init takes no arguments"
       end
 
       KV.create_kvdb(@kvdb_path)
@@ -44,7 +44,7 @@ class KV
       end
 
       if args.length > 1
-        raise KV::Error, "kv list only takes one filter argument"
+        raise KV::Error, "list only takes one filter argument"
       end
 
       regexp = Regexp.new(args.first) if args.length > 0
@@ -70,7 +70,7 @@ class KV
       end
 
       if args.length != 1
-        raise KV::Error, "kv nodepath only takes one node argument"
+        raise KV::Error, "nodepath takes one argument"
       end
 
       node_name = args.shift
@@ -92,7 +92,7 @@ class KV
       end
 
       if args.length != 1
-        raise KV::Error, "kv print takes exactly one argument"
+        raise KV::Error, "print takes one argument"
       end
 
       key_path = args.first
