@@ -27,6 +27,9 @@ class KV
     def set(key, value); @attrs.set(key, value); end
 
     public
+    def delete(key); @attrs.delete(key); end
+
+    public
     def save
       write_data
     end

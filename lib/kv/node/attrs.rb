@@ -37,6 +37,11 @@ class KV
       end
 
       public
+      def delete(key)
+        @attrs.delete(key)
+      end
+
+      public
       def [](key);
         v = @attrs[key]
         return v if v.nil?

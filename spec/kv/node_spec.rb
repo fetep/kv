@@ -218,4 +218,15 @@ describe KV::Node do
       n["key1"].should eq("value1")
     end
   end
+
+  describe "#delete" do
+    it "should delete existing keys" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n.add("key1", "value1")
+      n.add("key1", "value2")
+      n.delete("key1")
+      n["key1"].should eq(nil)
+    end
+  end # describe #delete
 end # describe KV::Node
