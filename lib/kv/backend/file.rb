@@ -101,7 +101,11 @@ class KV
       end # def node_path
 
       public
-      def node(node_name)
+      def node(node_name, skip_cache=false)
+        if skip_cache
+          return KV::Node.new(node_name, node_path(node_name))
+        end
+
         @nodes[node_name] ||= KV::Node.new(node_name, node_path(node_name))
         return @nodes[node_name]
       end

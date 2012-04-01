@@ -133,11 +133,14 @@ class KV
       kv_init
 
       opts = Trollop::options(args) do
-        banner "Usage: kv [-d dir] set [-c] <node> [<datafile>]" +
+        banner "Usage: kv [-d dir] set [-c] [-a] <node> [<datafile>]" +
                "\n\n  reads from stdin if no datafile is provided"
                "\n\ndata should be of format 'key: value'"
 
         opt :create, :description => "allow creation of new nodes",
+            :default => false
+        opt :append,
+            :description => "append to existing values (default is overwrite)",
             :default => false
       end
 
@@ -161,9 +164,17 @@ class KV
       end
 
       node = @kv.node(node_name)
+      add = []
+
       KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read) do |k, v|
+        node.delete(k) unless opts[:append]
+        add << [k, v]
+      end
+
+      add.each do |k, v|
         node.add(k, v)
       end
+
       node.save
     end
 

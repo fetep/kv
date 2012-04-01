@@ -21,7 +21,7 @@ class KV
       end # def add
 
       public
-      def set(key, value)
+      def set(key, value, overwrite=true)
         value = [value] unless value.is_a?(Array)
         value.each do |v|
           if ! KV::Util.value_valid?(v)

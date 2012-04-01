@@ -157,7 +157,7 @@ describe KV::Command do
       end
 
       stdout, stderr = wrap_output do
-        KV::Command.new(@kvdb_path).run("import", ["test", data_file])
+        KV::Command.new(@kvdb_path).run("set", ["-c", "test", data_file])
       end
       stdout.should eq('')
 
@@ -166,6 +166,44 @@ describe KV::Command do
       n = kv.node("test")
       n["key1"].should eq(["value1", "value2"])
       n["key2"].should eq("value")
+    end
+
+    it "should overwrite existing keys by default" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value2"
+      end
+
+      stdout, stderr = wrap_output do
+        KV::Command.new(@kvdb_path).run("set", ["test", data_file])
+      end
+
+      n = kv.node("test", true)
+      n["key1"].should eq("value2")
+    end
+
+    it "should append to existing keys with -a" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value2"
+      end
+
+      stdout, stderr = wrap_output do
+        KV::Command.new(@kvdb_path).run("set", ["-a", "test", data_file])
+      end
+
+      n = kv.node("test", true)
+      n["key1"].should eq(["value1", "value2"])
     end
 
     it "should refuse to create a new node without -c" do

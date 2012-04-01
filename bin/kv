@@ -5,6 +5,7 @@ $: << File.join(File.dirname($0), "..", "lib")
 require "rubygems"
 require "kv/command"
 require "trollop"
+require "ruby-prof"
 
 $progname = File.basename($0)
 
