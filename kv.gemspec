@@ -15,12 +15,15 @@ Gem::Specification.new do |spec|
   spec.description = ""
   spec.license = "MPL 2.0"
 
+  spec.add_dependency "ferret"
   spec.add_dependency "json"
+  spec.add_dependency "sinatra"
   spec.add_dependency "trollop"
   spec.add_dependency "uuidtools"
 
   # testing-related
   spec.add_development_dependency "mkdtemp"
+  spec.add_development_dependency "rack-test"
   spec.add_development_dependency "rspec"
 
   spec.files = files

@@ -1,0 +1,25 @@
+#!/usr/bin/ruby
+
+$: << File.join(File.dirname($0), "..", "lib")
+
+require "rubygems"
+require "ferret"
+require "kv/backend/file"
+require "kvd/indexer"
+require "kvd/web"
+require "trollop"
+
+$progname = File.basename($0)
+
+opts = Trollop::options do
+  opt :kvdb, "path to kvdb", :default => ENV["KVDB"] || ".",
+      :short => "-d"
+
+  opt :port, "port to listen on", :default => 4200,
+      :short => "-p"
+end
+
+kv = KV::Backend::File.new(:path => opts[:kvdb])
+indexer = KVD::Indexer.new(kv)
+KVD::Web.ferret_index = indexer.index
+KVD::Web.run!(:port => opts[:port])
