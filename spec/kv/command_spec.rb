@@ -219,11 +219,89 @@ describe KV::Command do
     end
 
     it "should fail with the wrong number of arguments" do
-      expect { KV::Command.new(@kvdb_path).run("set", []) }.should \
-        raise_error(KV::Error, "must specify a node name")
-
-      expect { KV::Command.new(@kvdb_path).run("set", ["a", "b", "c"]) }.should \
+      expect { KV::Command.new(@kvdb_path).run("set", ["-c", "a", "b", "c"]) }.should \
         raise_error(KV::Error, "too many arguments")
+    end
+
+    it "should read full nodepaths from input with -f" do
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "test/1#key1: value1"
+        f.puts "test/1#key1: value2"
+        f.puts "test/2#key1: value1"
+      end
+
+      KV::Command.new(@kvdb_path).run("set", ["-cf", data_file])
+      kv = KV.new(:path => @kvdb_path)
+      kv.nodes.should eq(["test/1", "test/2"])
+      n = kv.node("test/1")
+      n["key1"].should eq(["value1", "value2"])
+      n = kv.node("test/2")
+      n["key1"].should eq("value1")
+    end
+
+    it "should fail a -f full update that creates a node without -c" do
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "test/1#key1: value1"
+        f.puts "test/1#key1: value2"
+        f.puts "test/2#key1: value1"
+      end
+
+      expect { KV::Command.new(@kvdb_path).run("set", ["-f", data_file]) }.should \
+        raise_error(KV::Error, "node test/1 does not exist, and -c not given")
+    end
+
+    it "should default to replacing keys with -f" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "test/1#key1: value2"
+      end
+
+      KV::Command.new(@kvdb_path).run("set", ["-f", data_file])
+      n = kv.node("test/1", true)
+      n["key1"].should eq("value2")
+    end
+
+    it "should append keys with -f -a" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "test/1#key1: value2"
+      end
+
+      KV::Command.new(@kvdb_path).run("set", ["-af", data_file])
+      n = kv.node("test/1", true)
+      n["key1"].should eq(["value1", "value2"])
+    end
+
+    it "should treat the entire set as a transaction, and abort all changes if one update fails" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "data.tmp")
+      File.open(data_file, "w+") do |f|
+        f.puts "test/1#key1: value2"
+        f.puts "test/2#key1: value2"
+      end
+
+      expect do
+        KV::Command.new(@kvdb_path).run("set", ["-f", data_file])
+      end.should raise_error(KV::Error,
+                             "node test/2 does not exist, and -c not given")
+      n = kv.node("test/1", true)
+      n["key1"].should eq("value1")
     end
   end
 

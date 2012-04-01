@@ -133,8 +133,9 @@ class KV
       kv_init
 
       opts = Trollop::options(args) do
-        banner "Usage: kv [-d dir] set [-c] [-a] <node> [<datafile>]" +
-               "\n\n  reads from stdin if no datafile is provided"
+        banner "Usage: kv [-d dir] set [-c] [-a] <node> [<datafile>]" \
+               "\n       kv [-d dir] set [-c] [-a] -f [<datafile>]" \
+               "\n\n  reads from stdin if no datafile is provided" \
                "\n\ndata should be of format 'key: value'"
 
         opt :create, :description => "allow creation of new nodes",
@@ -142,40 +143,67 @@ class KV
         opt :append,
             :description => "append to existing values (default is overwrite)",
             :default => false
+        opt :full,
+            :description => "read full nodepaths (node#key) from datafile",
+            :default => false
       end
 
-      node_name = args.shift
+
+      if !opts[:full]
+        node_name = args.shift
+
+        if node_name.nil?
+          raise KV::Error, "must specify a node name"
+        end
+
+        if ! @kv.node?(node_name) and ! opts[:create]
+          raise KV::Error, "node #{node_name} does not exist, and -c not given"
+        end
+      end
+
       datafile = args.shift
-
-      if node_name.nil?
-        raise KV::Error, "must specify a node name"
-      end
 
       if args.length > 0
         raise KV::Error, "too many arguments"
-      end
-
-      if ! @kv.node?(node_name) and ! opts[:create]
-        raise KV::Error, "node #{node_name} does not exist, and -c not given"
       end
 
       if datafile and ! File.exists?(datafile)
         raise KV::Error, "#{datafile}: data file does not exist"
       end
 
-      node = @kv.node(node_name)
-      add = []
+      if opts[:full]
+        node_cache = Hash.new { |h, k| h[k] = @kv.node(k) }
+        adds = Hash.new { |h, k| h[k] = [] }
+        KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read, true) do |n, k, v|
+          if ! @kv.node?(n) and ! opts[:create]
+            raise KV::Error, "node #{n} does not exist, and -c not given"
+          end
+          node_cache[n].delete(k) unless opts[:append]
+          adds[n] << [k, v]
+        end
 
-      KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read) do |k, v|
-        node.delete(k) unless opts[:append]
-        add << [k, v]
+        adds.each do |n, add|
+          add.each do |k, v|
+            node_cache[n].add(k, v)
+          end
+        end
+
+        node_cache.values.each { |n| n.save }
+      else
+        node = @kv.node(node_name)
+        add = []
+
+        KV::Util.parse_data(datafile ? File.read(datafile) : STDIN.read) do |k, v|
+          node.delete(k) unless opts[:append]
+          add << [k, v]
+        end
+
+        add.each do |k, v|
+          node.add(k, v)
+        end
+
+        node.save
       end
-
-      add.each do |k, v|
-        node.add(k, v)
-      end
-
-      node.save
     end
 
     private
