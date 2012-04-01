@@ -96,6 +96,16 @@ describe KV::Util do
       expected = { "key1" => ["value1", "value2"], "key2" => ["value2"] }
       attrs.should eq(expected)
     end
+
+    it "should expect full keypaths if full_keypath=true" do
+      attrs = Hash.new { |h, k| h[k] = Hash.new { |h, k| h[k] = [] } }
+      KV::Util.parse_data("test/1#key1: value: foo\n", true) do |n, k, v|
+        attrs[n][k] << v
+      end
+
+      expected = { "test/1" => { "key1" => ["value: foo"] } }
+      attrs.should eq(expected)
+    end
   end
 
   describe '.expand_key_path' do
@@ -134,14 +144,14 @@ describe KV::Util do
 
     it "should bail on an empty node name" do
       expect { KV::Util.expand_key_path("#key") }.should \
-              raise_error(KV::Error, "invalid key path, cannot be empty")
+              raise_error(KV::Error, "#key: invalid key path, cannot be empty")
       expect { KV::Util.expand_key_path("#key#0") }.should \
-              raise_error(KV::Error, "invalid key path, cannot be empty")
+              raise_error(KV::Error, "#key#0: invalid key path, cannot be empty")
     end
 
     it "should bail on invalid values" do
       expect { KV::Util.expand_key_path("") }.should \
-              raise_error(KV::Error, "invalid key path, cannot be empty")
+              raise_error(KV::Error, ": invalid key path, cannot be empty")
       expect { KV::Util.expand_key_path(nil) }.should \
               raise_error(KV::Error, "invalid key path type NilClass")
       expect { KV::Util.expand_key_path(:x) }.should \

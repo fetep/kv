@@ -19,7 +19,7 @@ class KV
     end
 
     public
-    def self.parse_data(data, &block)
+    def self.parse_data(data, full_keypath=false, &block)
       data.split("\n").each do |line|
         line.chomp!
         if line == '' or line[0..0] == '#'
@@ -27,7 +27,12 @@ class KV
         end
 
         key, value = line.split(':', 2)
-        yield(key.strip, value.strip)
+        if full_keypath
+          node, key, index = self.expand_key_path(key)
+          yield(node, key.strip, value.strip)
+        else
+          yield(key.strip, value.strip)
+        end
       end
     end # def self.parse_data
 
@@ -42,7 +47,7 @@ class KV
       end
 
       if node.nil? or node.empty?
-        raise KV::Error, "invalid key path, cannot be empty"
+        raise KV::Error, "#{key_path}: invalid key path, cannot be empty"
       end
 
       return node, key, index
