@@ -3,7 +3,7 @@ require "kv/exception"
 class KV
   class Backend
     class Base
-      NOT_IMPL = "command not supported by backend #{self.type}"
+      NOT_IMPL = "command not supported by backend #{self.class}"
 
       public
       def node_path(node_name)
