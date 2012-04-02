@@ -389,5 +389,48 @@ describe KV::Command do
         KV::Command.new(@kvdb_path).run("cp", ["test/1", "test/2"])
       end.should raise_error(KV::Error, "node test/2 already exists")
     end
-  end
+  end # describe #cp
+
+  describe '#edit' do
+    it "should run env \$EDITOR with a temp file path, and apply changes" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "kvedit")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value2"
+      end
+
+      ENV["EDITOR"] = "cp #{data_file}"
+      KV::Command.new(@kvdb_path).run("edit", ["test/1"])
+
+      n = kv.node("test/1", true)
+      n["key1"].should eq("value2")
+    end
+
+    it "should abort the edit if EDITOR exits non-zero" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+
+      script_file = File.join(@tmp_dir, "kvedit")
+      File.open(script_file, "w+") do |f|
+        f.puts '#!/bin/sh'
+        f.puts 'echo key1: value2 >> $1'
+        f.puts 'exit 4'
+      end
+      FileUtils.chmod(0755, script_file)
+
+      ENV["EDITOR"] = script_file
+      expect do
+        KV::Command.new(@kvdb_path).run("edit", ["test/1"])
+      end.should raise_error(KV::Error, "aborting edit, editor exited 4")
+
+      n = kv.node("test/1", true)
+      n["key1"].should eq("value1")
+    end
+  end # describe #edit
 end # describe KV::Command

@@ -1,12 +1,13 @@
 require "rubygems"
 require "kv"
 require "kv/util"
+require "tempfile"
 require "trollop"
 
 class KV
   class Command
     VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set",
-                      "cp"]
+                      "cp", "edit"]
 
     public
     def initialize(kvdb_path)
@@ -237,6 +238,38 @@ class KV
         end
       end
       dst_node.save
+    end
+
+    public
+    def edit(args)
+      kv_init
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] edit <node>"
+      end
+
+      if args.length != 1
+        raise KV::Error, "edit takes one node name"
+      end
+
+      node_name = args.shift
+      node = @kv.node(node_name)
+      node_path = node.path
+
+      tmp_path = Tempfile.new("kv")
+      node.attrs.each do |attr, value|
+        tmp_path.puts "#{attr}: #{value}"
+      end
+      tmp_path.flush
+
+      editor = ENV["EDITOR"] || "vi"
+      system("sh", "-c", [editor, tmp_path.path].join(" "))
+      if $?.exitstatus != 0
+        raise KV::Error, "aborting edit, editor exited #{$?.exitstatus}"
+      end
+      set([node_name, tmp_path.path])
+      tmp_path.unlink
+      tmp_path.close
     end
 
     private
