@@ -2,6 +2,7 @@ require "rubygems"
 require "fileutils"
 require "json"
 require "kv/backend/file"
+require "kv/backend/http"
 require "kv/exception"
 require "kv/node"
 require "kv/util"
@@ -34,6 +35,10 @@ class KV
 
     if opts[:path].nil?
       raise KV::Error.new("missing :path argument to constructor")
+    end
+
+    if opts[:path][0..6] == "http://"
+      return KV::Backend::HTTP.new(opts)
     end
 
     return KV::Backend::File.new(opts)
