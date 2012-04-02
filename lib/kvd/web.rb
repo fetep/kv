@@ -31,11 +31,16 @@ class KVD
       content_type "application/json"
 
       res = []
-      @@ferret_index.search_each(params[:q]) do |id, score|
-        res << @@ferret_index[id]["__kvdb_node"]
+      @@ferret_index.search_each(params[:q], :limit => :all) do |id, score|
+        res << @@ferret_index[id][:id]
       end
 
       return res.to_json
+    end
+
+    get '/get' do
+      $stderr.puts params[:q].inspect
+      return @@ferret_index[params[:q]].load.to_json
     end
   end # class Web
 end # class KVD

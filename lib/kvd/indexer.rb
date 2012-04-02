@@ -7,12 +7,10 @@ class KVD
     attr_reader :index
     attr_reader :kv
 
-    KVDB_NODE = "__kvdb_node"
-
     public
     def initialize(kv)
       @kv = kv
-      @index = Ferret::Index::Index.new(:key => KVDB_NODE)
+      @index = Ferret::Index::Index.new
 
       initial_index
     end
@@ -22,7 +20,7 @@ class KVD
       kv.nodes.each do |node_name|
         node = kv.node(node_name)
         doc = node.attrs.to_hash
-        doc[KVDB_NODE] = node_name
+        doc[:id] = node_name
         @index << doc
       end
     end # def initialize
