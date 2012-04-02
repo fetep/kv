@@ -350,5 +350,44 @@ describe KV::Command do
       expect { KV::Command.new(@kvdb_path).run("print", ["a", "b"]) }.should \
         raise_error(KV::Error, "print takes one argument")
     end
-  end # describe KV::Node
-end
+  end # describe #print
+
+  describe '#cp' do
+    it "should copy a node" do
+      kv = KV.new(:path => @kvdb_path)
+      n1 = kv.node("test/1")
+      n1.add("key1", "value1")
+      n1.add("key1", "value2")
+      n1.add("key2", "value")
+      n1.save
+
+      stdout, stderr = wrap_output do
+        KV::Command.new(@kvdb_path).run("cp", ["test/1", "test/2"])
+      end
+      stdout.should eq('')
+
+      n2 = kv.node("test/2")
+      n2.attrs.to_hash.sort.should eq(n1.attrs.to_hash.sort)
+    end
+
+    it "should fail when the source node does not exist" do
+      expect do
+        KV::Command.new(@kvdb_path).run("cp", ["test/1", "test/2"])
+      end.should raise_error(KV::Error, "node test/1 does not exist")
+    end
+
+    it "should fail when the dest node already exists" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.save
+      n = kv.node("test/2")
+      n.add("key1", "value1")
+      n.save
+
+      expect do
+        KV::Command.new(@kvdb_path).run("cp", ["test/1", "test/2"])
+      end.should raise_error(KV::Error, "node test/2 already exists")
+    end
+  end
+end # describe KV::Command

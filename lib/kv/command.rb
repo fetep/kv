@@ -5,7 +5,8 @@ require "trollop"
 
 class KV
   class Command
-    VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set"]
+    VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set",
+                      "cp"]
 
     public
     def initialize(kvdb_path)
@@ -204,6 +205,38 @@ class KV
 
         node.save
       end
+    end
+
+    public
+    def cp(args)
+      kv_init
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] cp <node> <new_node>"
+      end
+
+      if args.length != 2
+        raise KV::Error, "cp takes two arguments"
+      end
+
+      src_node_name = args.shift
+      dst_node_name = args.shift
+
+      if ! @kv.node?(src_node_name)
+        raise KV::Error, "node #{src_node_name} does not exist"
+      end
+      if @kv.node?(dst_node_name)
+        raise KV::Error, "node #{dst_node_name} already exists"
+      end
+
+      src_node = @kv.node(src_node_name)
+      dst_node = @kv.node(dst_node_name)
+      src_node.attrs.to_hash.each do |key, values|
+        values.each do |value|
+          dst_node.add(key, value)
+        end
+      end
+      dst_node.save
     end
 
     private
