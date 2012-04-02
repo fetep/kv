@@ -29,6 +29,11 @@ class KV
       def expand(key_path, verbose = false, raise_on_bad_node_name = true)
         raise KV::Error, NOT_IMPL
       end # def expand
+
+      public
+      def delete(node_name)
+        raise KV::Error, NOT_IMPL
+      end # def delete
     end # class Base
   end # class Backend
 end # class KV

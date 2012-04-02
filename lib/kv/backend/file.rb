@@ -129,6 +129,18 @@ class KV
         return res.sort
       end # def expand
 
+      public
+      def delete(node_name)
+        if ! node?(node_name)
+          raise KV::Error, "node #{node_name} does not exist"
+        end
+
+        n = node(node_name)
+        ::File.unlink(n.path)
+        @kvdb_metadata["mapping"].delete(node_name)
+        write_metadata
+      end
+
       private
       def expand_values(node, key, values, verbose)
         res = []

@@ -233,4 +233,24 @@ describe KV do
         ])
     end
   end
+
+  describe '#delete' do
+    it "should fail to delete a node that does not exist" do
+      kv = KV.new(:path => @kvdb_path)
+      expect do
+        kv.delete("test/1")
+      end.should raise_error(KV::Error, "node test/1 does not exist")
+    end
+
+    it "should delete an existing node" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("foo", "bar")
+      n.save
+      kv.node?("test/1").should eq(true)
+
+      kv.delete("test/1")
+      kv.node?("test/1").should eq(false)
+    end
+  end
 end # KV
