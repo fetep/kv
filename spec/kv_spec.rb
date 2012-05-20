@@ -83,6 +83,14 @@ describe KV do
     end
   end
 
+  describe '#kvdb_path' do
+    it "returns the filesystem path to kvdb" do
+
+      kv = KV.new(:path => @kvdb_path)
+      kv.kvdb_path.should eq(@kvdb_path)
+    end
+  end
+
   describe '#node_path' do
     it "returns an existing mapping if one exists" do
       node_path = File.join(@kvdb_path, "test")

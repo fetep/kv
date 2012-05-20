@@ -59,6 +59,11 @@ class KV
       end # def write_metadata
 
       public
+      def kvdb_path
+        return @opts[:path]
+      end
+
+      public
       def node_path(node_name)
         if ! node_name.is_a?(String)
           raise "node_path takes a String, not: #{node_name.inspect}"

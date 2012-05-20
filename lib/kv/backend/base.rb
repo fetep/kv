@@ -6,6 +6,11 @@ class KV
       NOT_IMPL = "command not supported by backend #{self.class}"
 
       public
+      def kvdb_path
+        raise KV::Error, NOT_IMPL
+      end
+
+      public
       def node_path(node_name)
         raise KV::Error, NOT_IMPL
       end
