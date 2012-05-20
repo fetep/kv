@@ -10,7 +10,7 @@ class KV
     attr_reader :path
 
     public
-    def initialize(name, path)
+    def initialize(name, path=nil)
       @name, @path = name, path
       @mtime = 0
       @attrs = KV::Node::Attrs.new
@@ -50,6 +50,8 @@ class KV
 
     private
     def load_data
+      return unless @path
+
       new_attrs = KV::Node::Attrs.new
       File.open(@path) do |file|
         @mtime = file.stat.mtime
