@@ -90,7 +90,7 @@ class KV
       opts = Trollop::options(args) do
         banner "Usage: kv [-d dir] print [-v] <keypath>"
 
-        opt :verbose, :description => "verbose, always show keypath in output"
+        opt :verbose, "verbose, always show keypath in output"
       end
 
       if args.length != 1
@@ -140,13 +140,13 @@ class KV
                "\n\n  reads from stdin if no datafile is provided" \
                "\n\ndata should be of format 'key: value'"
 
-        opt :create, :description => "allow creation of new nodes",
+        opt :create, "allow creation of new nodes",
             :default => false
         opt :append,
-            :description => "append to existing values (default is overwrite)",
+            "append to existing values (default is overwrite)",
             :default => false
         opt :full,
-            :description => "read full nodepaths (node#key) from datafile",
+            "read full nodepaths (node#key) from datafile",
             :default => false
       end
 
