@@ -1,0 +1,21 @@
+#!/usr/bin/ruby
+
+$: << File.join(File.dirname($0), "..", "lib")
+
+require "rubygems"
+require "kv"
+require "kv/audit"
+require "trollop"
+
+$progname = File.basename($0)
+
+opts = Trollop::options do
+  opt :kvdb, "path to kvdb", :default => ENV["KVDB"] || ".",
+      :short => "-d"
+end
+
+kv = KV.new(:path => opts[:kvdb])
+kv_audit = KV::Audit.new(kv)
+kv_audit.audit.sort.each do |node, messages|
+  puts messages.collect { |m| "#{node}: #{m}" }.join("\n")
+end
