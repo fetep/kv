@@ -55,7 +55,9 @@ class KV
 
       private
       def write_metadata
-        ::File.open(@kvdb_metadata_path, "w+") { |f| f.puts @kvdb_metadata.to_json }
+        ::File.open(@kvdb_metadata_path, "w+") do |f|
+          f.puts JSON.pretty_generate(@kvdb_metadata)
+        end
       end # def write_metadata
 
       public
