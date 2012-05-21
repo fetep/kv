@@ -17,7 +17,7 @@ describe KV::Audit do
       n2.attrs["t1"] = "test"
 
       messages = audit.audit
-      messages.should eq({"test/foo" => ["missing required key t2"]})
+      messages.should eq({"test/foo" => ["t2: missing required key"]})
     end
   end # describe #audit
 
@@ -32,7 +32,7 @@ describe KV::Audit do
       n1.attrs["t2"] = "test"
 
       messages = audit.audit
-      messages.should eq({"test/foo" => ["missing required key t1"]})
+      messages.should eq({"test/foo" => ["t1: missing required key"]})
     end
 
     it "should also add validations" do
@@ -109,6 +109,34 @@ describe KV::Audit do
       messages.should eq({})
     end
   end # describe #audit_required
+
+  describe "#audit_optional" do
+    it "should not require keys be present" do
+      kv = KV.new(:path => @kvdb_path)
+      audit = KV::Audit.new(kv)
+
+      audit.config.optional({"t1" => []})
+
+      n1 = kv.node("test/foo")
+      n1.attrs["t2"] = "test"
+
+      messages = audit.audit
+      messages.should eq({})
+    end
+
+    it "should not require keys be present but still do validations" do
+      kv = KV.new(:path => @kvdb_path)
+      audit = KV::Audit.new(kv)
+
+      audit.config.optional({"t1" => [:single_value]})
+
+      n1 = kv.node("test/foo")
+      n1.attrs["t1"] = ["a", "b"]
+
+      messages = audit.audit
+      messages.should eq({"test/foo" => ["t1: [\"a\", \"b\"]: must be a single value"]})
+    end
+  end
 
   describe "#audit_validations" do
     it "should run a custom violation" do
