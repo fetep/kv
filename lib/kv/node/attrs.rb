@@ -49,6 +49,11 @@ class KV
       end
 
       public
+      def []=(key, value);
+        set(key, value)
+      end
+
+      public
       def to_hash; @attrs; end
 
       public

@@ -89,4 +89,14 @@ describe KV::Node::Attrs do
       expect { n.set(:key1, "value1") }.should raise_error(KV::Error)
     end
   end # describe #add
+
+  describe "#[]=" do
+    it "should call set" do
+      node_path = File.join(@kvdb_path, "test")
+      n = KV::Node.new("test", node_path)
+      n.attrs["key1"] = "value1"
+      n.attrs["key1"] = "value2"
+      n.attrs["key1"].should eq("value2")
+    end
+  end
 end # describe KV::Node
