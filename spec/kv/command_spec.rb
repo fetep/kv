@@ -391,6 +391,31 @@ describe KV::Command do
     end
   end # describe #cp
 
+  describe '#rm' do
+    it "should delete a node" do
+      kv = KV.new(:path => @kvdb_path)
+      n1 = kv.node("test/1")
+      n1.add("key1", "value1")
+      n1.save
+
+      kv.node?("test/1").should eq(true)
+
+      stdout, stderr = wrap_output do
+        KV::Command.new(@kvdb_path).run("rm", ["test/1"])
+      end
+      stdout.should eq('')
+
+      kv = KV.new(:path => @kvdb_path)
+      kv.node?("test/1").should eq(false)
+    end
+
+    it "should fail when the node does not exist" do
+      expect do
+        KV::Command.new(@kvdb_path).run("rm", ["test/1"])
+      end.should raise_error(KV::Error, "node test/1 does not exist")
+    end
+  end # describe #rm
+
   describe '#edit' do
     it "should run env \$EDITOR with a temp file path, and apply changes" do
       kv = KV.new(:path => @kvdb_path)

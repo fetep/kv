@@ -7,7 +7,7 @@ require "trollop"
 class KV
   class Command
     VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set",
-                      "cp", "edit"]
+                      "cp", "edit", "rm"]
 
     public
     def initialize(kvdb_path)
@@ -238,6 +238,27 @@ class KV
         end
       end
       dst_node.save
+    end
+
+    public
+    def rm(args)
+      kv_init
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] rm <node>"
+      end
+
+      if args.length != 1
+        raise KV::Error, "rm takes one argument"
+      end
+
+      node_name = args.shift
+
+      if ! @kv.node?(node_name)
+        raise KV::Error, "node #{node_name} does not exist"
+      end
+
+      @kv.delete(node_name)
     end
 
     public

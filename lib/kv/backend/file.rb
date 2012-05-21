@@ -144,6 +144,7 @@ class KV
 
         n = node(node_name)
         ::File.unlink(n.path)
+        @nodes.delete(node_name)
         @kvdb_metadata["mapping"].delete(node_name)
         write_metadata
       end
