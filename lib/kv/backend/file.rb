@@ -58,7 +58,8 @@ class KV
       private
       def write_metadata
         tmp_path = Tempfile.new("kv")
-        tmp_path.puts JSON.pretty_generate(@kvdb_metadata)
+        h = KV::Util.convert_hash_to_ordered_hash_and_sort(@kvdb_metadata, true)
+        tmp_path.puts JSON.pretty_generate(h)
         tmp_path.close
         ::File.rename(tmp_path.path, @kvdb_metadata_path)
       end # def write_metadata

@@ -1,3 +1,6 @@
+require "rubygems"
+require "active_support" # for OrderedHash
+
 class KV
   module Util
     public
@@ -52,5 +55,25 @@ class KV
 
       return node, key, index
     end # def self.expand_key_path
+
+    public
+    def self.convert_hash_to_ordered_hash_and_sort(object, deep = false)
+      # from https://gist.github.com/1083930
+      if object.is_a?(Hash)
+        res = ActiveSupport::OrderedHash.new
+        object.each do |k, v|
+          res[k] = deep ? convert_hash_to_ordered_hash_and_sort(v, deep) : v
+        end
+        return res.class[res.sort {|a, b| a[0].to_s <=> b[0].to_s } ]
+      elsif deep && object.is_a?(Array)
+        array = Array.new
+        object.each_with_index do |v, i|
+          array[i] = convert_hash_to_ordered_hash_and_sort(v, deep)
+        end
+        return array
+      else
+        return object
+      end
+    end # def self.convert_hash_to_ordered_hash_and_sort
   end # module Util
 end # class KV
