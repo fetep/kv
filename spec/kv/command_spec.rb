@@ -435,6 +435,26 @@ describe KV::Command do
       n["key1"].should eq("value2")
     end
 
+    it "should handle attribute deletion" do
+      kv = KV.new(:path => @kvdb_path)
+      n = kv.node("test/1")
+      n.add("key1", "value1")
+      n.add("key2", "value1")
+      n.save
+
+      data_file = File.join(@tmp_dir, "kvedit")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value2"
+      end
+
+      ENV["EDITOR"] = "cp #{data_file}"
+      KV::Command.new(@kvdb_path).run("edit", ["test/1"])
+
+      n = kv.node("test/1", true)
+      n["key1"].should eq("value2")
+      n.attrs.to_hash.member?("key2").should eq(false)
+    end
+
     it "should abort the edit if EDITOR exits non-zero" do
       kv = KV.new(:path => @kvdb_path)
       n = kv.node("test/1")

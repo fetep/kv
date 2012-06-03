@@ -288,7 +288,22 @@ class KV
       if $?.exitstatus != 0
         raise KV::Error, "aborting edit, editor exited #{$?.exitstatus}"
       end
+
+      # set new attributes
       set([node_name, tmp_path.path])
+
+      # handle attribute deletion
+      keys = {}
+      KV::Util.parse_data(File.read(tmp_path.path)) { |k, v| keys[k] = true }
+      node = @kv.node(node_name)
+      changed = false
+      node.attrs.to_hash.keys.each do |k|
+        next if keys.member?(k)
+        node.delete(k)
+        changed = true
+      end
+      node.save if changed
+
       tmp_path.unlink
       tmp_path.close
     end
