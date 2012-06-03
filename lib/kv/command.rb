@@ -266,7 +266,10 @@ class KV
       kv_init
 
       opts = Trollop::options(args) do
-        banner "Usage: kv [-d dir] edit <node>"
+        banner "Usage: kv [-d dir] edit [-c] <node>"
+
+        opt :create, "allow creation of new nodes",
+            :default => false
       end
 
       if args.length != 1
@@ -274,6 +277,9 @@ class KV
       end
 
       node_name = args.shift
+      if not opts[:create] and not @kv.node?(node_name)
+        raise KV::Error, "node #{node_name} does not exist (-c to create)"
+      end
       node = @kv.node(node_name)
       node_path = node.path
 

@@ -435,6 +435,37 @@ describe KV::Command do
       n["key1"].should eq("value2")
     end
 
+    it "should create a new node with -c" do
+      kv = KV.new(:path => @kvdb_path)
+
+      data_file = File.join(@tmp_dir, "kvedit")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value1"
+      end
+
+      ENV["EDITOR"] = "cp #{data_file}"
+      KV::Command.new(@kvdb_path).run("edit", ["-c", "test/1"])
+
+      kv = KV.new(:path => @kvdb_path)
+      kv.node?("test/1").should eq(true)
+      kv.node("test/1")["key1"].should eq("value1")
+    end
+
+    it "should fail on a non-existant node without -c" do
+      kv = KV.new(:path => @kvdb_path)
+
+      data_file = File.join(@tmp_dir, "kvedit")
+      File.open(data_file, "w+") do |f|
+        f.puts "key1: value2"
+      end
+
+      ENV["EDITOR"] = "cp #{data_file}"
+      expect { KV::Command.new(@kvdb_path).run("edit", ["test/1"]) }.should \
+        raise_error(KV::Error, "node test/1 does not exist (-c to create)")
+
+      kv.node?("test/1").should eq(false)
+    end
+
     it "should handle attribute deletion" do
       kv = KV.new(:path => @kvdb_path)
       n = kv.node("test/1")
