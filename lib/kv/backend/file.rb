@@ -6,6 +6,7 @@ require "kv/exception"
 require "kv/node"
 require "kv/util"
 require "uuidtools"
+require "thread"
 
 class KV
   class Backend
@@ -57,9 +58,13 @@ class KV
 
       private
       def write_metadata
-        ::File.open(@kvdb_metadata_path, "w+") do |f|
-          f.puts JSON.pretty_generate(@kvdb_metadata)
-        end
+        tmp_path = Tempfile.new("kv")
+        tmp_path.puts JSON.pretty_generate(@kvdb_metadata)
+        tmp_path.close
+        ::File.rename(tmp_path.path, @kvdb_metadata_path)
+        #::File.open(@kvdb_metadata_path, "w+") do |f|
+        #  f.puts JSON.pretty_generate(@kvdb_metadata)
+        #end
       end # def write_metadata
 
       public
@@ -73,23 +78,22 @@ class KV
           raise "node_path takes a String, not: #{node_name.inspect}"
         end
         if @kvdb_metadata["mapping"][node_name]
-          return @kvdb_metadata["mapping"][node_name]
+          return ::File.join(@opts[:path], @kvdb_metadata["mapping"][node_name])
         end
 
         # get a UUID, build a path
         uuid = UUIDTools::UUID.sha1_create(UUIDTools::UUID_OID_NAMESPACE,
                                           node_name).to_s
-        path = ::File.join(@opts[:path],
-                        uuid[0..0],
-                        uuid[1..1],
-                        uuid[2..2],
-                        uuid)
+        path = ::File.join(uuid[0..0],
+                           uuid[1..1],
+                           uuid[2..2],
+                           uuid)
         @kvdb_metadata["mapping"][node_name] = path
 
         # re-write metadata
         write_metadata
 
-        return path
+        return ::File.join(@opts[:path], path)
       end # def node_path
 
       public

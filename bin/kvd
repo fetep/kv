@@ -9,6 +9,7 @@ require "kvd/indexer"
 require "kvd/web"
 require "trollop"
 
+Thread::abort_on_exception = true
 $progname = File.basename($0)
 
 opts = Trollop::options do
@@ -21,5 +22,6 @@ end
 
 kv = KV::Backend::File.new(:path => opts[:kvdb])
 indexer = KVD::Indexer.new(kv)
+indexer_watch_thread = Thread.new { indexer.watch }
 KVD::Web.ferret_index = indexer.index
 KVD::Web.run!(:port => opts[:port])

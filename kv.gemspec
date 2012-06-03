@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "sinatra"
   spec.add_dependency "trollop"
   spec.add_dependency "uuidtools"
+  spec.add_dependency "rb-inotify"
 
   # testing-related
   spec.add_development_dependency "mkdtemp"

@@ -32,7 +32,7 @@ class KVD
 
       res = []
       @@ferret_index.search_each(params[:q], :limit => :all) do |id, score|
-        res << @@ferret_index[id][:id]
+        res << @@ferret_index[id]["_node"]
       end
 
       return res.to_json

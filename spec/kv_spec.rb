@@ -77,6 +77,7 @@ describe KV do
     it "writes updated metadata" do
       kv = KV.new(:path => @kvdb_path)
       path = kv.node_path("test")
+      path.sub!(@kvdb_path + "/", "")
 
       kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
       kvdb_metadata["mapping"]["test"].should eq(path)
@@ -95,7 +96,7 @@ describe KV do
     it "returns an existing mapping if one exists" do
       node_path = File.join(@kvdb_path, "test")
       kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
-      kvdb_metadata["mapping"]["test"] = node_path
+      kvdb_metadata["mapping"]["test"] = "test"
       File.open(@kvdb_metadata_path, "w+") do |f|
         f.puts kvdb_metadata.to_json
       end
@@ -125,7 +126,7 @@ describe KV do
       end
 
       kvdb_metadata = JSON.parse(File.read(@kvdb_metadata_path))
-      kvdb_metadata["mapping"]["test"] = node_path
+      kvdb_metadata["mapping"]["test"] = "test"
       File.open(@kvdb_metadata_path, "w+") do |f|
         f.puts kvdb_metadata.to_json
       end
