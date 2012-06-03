@@ -27,12 +27,14 @@ class KV
 
         @nodes = {}
 
-        load_metadata
+        refresh
       end # def initialize
 
 
-      private
-      def load_metadata
+      public
+      def refresh
+        @nodes = {}
+
         begin
           @kvdb_metadata = JSON.parse(::File.read(@kvdb_metadata_path))
         rescue
