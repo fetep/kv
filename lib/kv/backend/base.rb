@@ -3,7 +3,7 @@ require "kv/exception"
 class KV
   class Backend
     class Base
-      NOT_IMPL = "command not supported by backend #{self.class}"
+      NOT_IMPL = "command not supported with current kvdb path"
 
       public
       def kvdb_path
@@ -39,6 +39,11 @@ class KV
       def delete(node_name)
         raise KV::Error, NOT_IMPL
       end # def delete
+
+      public
+      def find(node_name)
+        raise KV::Error, NOT_IMPL
+      end # def find
     end # class Base
   end # class Backend
 end # class KV

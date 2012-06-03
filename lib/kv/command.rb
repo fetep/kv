@@ -7,7 +7,7 @@ require "trollop"
 class KV
   class Command
     VALID_COMMANDS = ["import", "init", "list", "nodepath", "print", "set",
-                      "cp", "edit", "rm"]
+                      "cp", "edit", "rm", "find"]
 
     public
     def initialize(kvdb_path)
@@ -100,6 +100,22 @@ class KV
       key_path = args.first
 
       puts @kv.expand(key_path, opts[:verbose]).join("\n")
+    end
+
+    public
+    def find(args)
+      kv_init
+
+      opts = Trollop::options(args) do
+        banner "Usage: kv [-d dir] find <lucene expression>"
+      end
+
+      if args.length == 0
+        raise KV::Error, "find needs a lucene expression"
+      end
+
+      #puts @kv.find(args.join(" AND "))
+      puts @kv.find(args.join(" "))
     end
 
     public

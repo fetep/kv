@@ -1,5 +1,6 @@
 require "kv/exception"
 require "net/http"
+require "cgi"
 
 class KV
   class Backend
@@ -43,6 +44,12 @@ class KV
       def expand(key_path, verbose = false, raise_on_bad_node_name = true)
         raise KV::Error, NOT_IMPL
       end # def expand
+
+      public
+      def find(expression)
+        body = get("/search?q=#{CGI.escape(expression)}")
+        return JSON.parse(body)
+      end
 
       private
       def get(path)
