@@ -17,6 +17,8 @@ describe KVD::Indexer do
     n.set("foo", "bar")
     n.save
     @i = KVD::Indexer.new(@kv)
+    @watch_thread = Thread.new { @i.watch }
+    sleep(0.3) # let @i.watch warm up.  this is ugly.
   end
 
   describe "#initialize" do
@@ -40,10 +42,6 @@ describe KVD::Indexer do
   end # describe #initialize
 
   describe "#watch" do
-    before do
-      @watch_thread = Thread.new { @i.watch }
-    end
-
     it "should notice a new node" do
       kv = KV.new(:path => @kvdb_path)
       node = kv.node("test/new1")
@@ -51,7 +49,7 @@ describe KVD::Indexer do
       node.save
 
       try = 0
-      while try <= 3 and sleep(0.2) # let inotify event fire & get processed
+      while try <= 3 and sleep(0.4) # let inotify event fire & get processed
         try += 1
 
         res = {}
@@ -70,7 +68,7 @@ describe KVD::Indexer do
       kv.delete("test/1")
 
       try = 0
-      while try <= 3 and sleep(0.2) # let inotify event fire & get processed
+      while try <= 3 and sleep(0.4) # let inotify event fire & get processed
         try += 1
 
         res = {}

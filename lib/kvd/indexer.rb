@@ -86,7 +86,8 @@ class KVD
             $stderr.puts "WARNING: unknown inotify path #{name.inspect}"
           end
         end
-      end # inotify.watch
+      end # notifier.watch
+
       notifier.run
     end # def watch
   end # class Indexer

@@ -6,15 +6,18 @@ require "stringio"
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |c|
-  c.before(:each) do
+  c.before(:all) do
     @tmp_dir = Dir.mkdtemp
     @kvdb_path = File.join(@tmp_dir, "kvdb")
     @kvdb_metadata_path = File.join(@kvdb_path, ".kvdb")
+  end
+
+  c.before(:each) do
     KV.create_kvdb(@kvdb_path)
   end
 
   c.after(:each) do
-    FileUtils.rm_rf(@tmp_dir)
+    FileUtils.rm_rf(@kvdb_path)
   end
 end
 
