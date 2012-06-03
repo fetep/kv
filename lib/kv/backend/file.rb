@@ -61,9 +61,6 @@ class KV
         tmp_path.puts JSON.pretty_generate(@kvdb_metadata)
         tmp_path.close
         ::File.rename(tmp_path.path, @kvdb_metadata_path)
-        #::File.open(@kvdb_metadata_path, "w+") do |f|
-        #  f.puts JSON.pretty_generate(@kvdb_metadata)
-        #end
       end # def write_metadata
 
       public
