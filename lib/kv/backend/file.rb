@@ -6,7 +6,6 @@ require "kv/exception"
 require "kv/node"
 require "kv/util"
 require "uuidtools"
-require "thread"
 
 class KV
   class Backend
