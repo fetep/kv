@@ -284,6 +284,7 @@ class KV
       node_path = node.path
 
       tmp_path = Tempfile.new("kv")
+      tmp_path.puts "# #{node_name}"
       node.attrs.each do |attr, value|
         tmp_path.puts "#{attr}: #{value}"
       end
